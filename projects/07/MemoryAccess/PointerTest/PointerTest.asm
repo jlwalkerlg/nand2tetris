@@ -1,0 +1,161 @@
+// push
+@3030
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// pop
+@3
+D=A
+@R13
+M=D
+@SP
+M=M-1
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+// push
+@3040
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// pop
+@4
+D=A
+@R13
+M=D
+@SP
+M=M-1
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+// push
+@32
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// pop
+@2
+D=A
+@3
+A=M
+D=D+A
+@R13
+M=D
+@SP
+M=M-1
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+// push
+@46
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// pop
+@6
+D=A
+@4
+A=M
+D=D+A
+@R13
+M=D
+@SP
+M=M-1
+@SP
+A=M
+D=M
+@R13
+A=M
+M=D
+// push
+@3
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// push
+@4
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=M+D
+@SP
+M=M+1
+// push
+@2
+D=A
+@3
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// sub
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=M-D
+@SP
+M=M+1
+// push
+@6
+D=A
+@4
+A=M+D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=M+D
+@SP
+M=M+1
