@@ -206,12 +206,10 @@ class Tokenizer
 
     private function skipWhitespace(): void
     {
-        $whitespaceChars = [' ', "\n", "\t"];
-
         while (true) {
             $char = fgetc($this->inputFile);
 
-            if (in_array($char, $whitespaceChars)) continue;
+            if (ctype_space($char)) continue;
 
             if ($char === '/' && $this->isNextString('/')) {
                 $this->skipLine();
