@@ -12,6 +12,8 @@ $analyzer->run($argv[1]);
 
 class Analyzer
 {
+    private $prefix = 'JW_';
+
     public function run(string $input)
     {
         $files = $this->getFiles($input);
@@ -21,15 +23,9 @@ class Analyzer
             $outputFile = fopen($outputFilename, 'w');
 
             $tokenizer = new Tokenizer($inputFile);
+            $compilationEngine = new CompilationEngine($tokenizer, $outputFile);
 
-            while ($tokenizer->hasMoreTokens()) {
-                $token = $tokenizer->advance();
-                echo "token: {$token} type: {$tokenizer->tokenType()}\n";
-                if ($tokenizer->tokenType() === Tokenizer::KEYWORD) {
-                    echo "keyword: {$token} type: {$tokenizer->keyWord()}\n";
-                }
-            }
-            // $compilationEngine = new CompilationEngine($inputFile, $outputFile);
+            $compilationEngine->compileClass();
 
             fclose($inputFile);
             fclose($outputFile);
@@ -60,6 +56,6 @@ class Analyzer
 
     private function getOutputFilename(string $inputFilename)
     {
-        return basename($inputFilename, '.jack') . '.xml';
+        return $this->prefix . basename($inputFilename, '.jack') . '.xml';
     }
 }

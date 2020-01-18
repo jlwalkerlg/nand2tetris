@@ -41,9 +41,11 @@ class Tokenizer
         '{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '/', '&', '|', '<', '>', '=', '~',
     ];
 
-    private $inputFile;
-    private $currentToken;
+    // TODO: make currentToken private; public for debugging purposes only.
+    public $currentToken;
     private $tokenType;
+
+    private $inputFile;
 
     public function __construct($inputFile)
     {
@@ -57,21 +59,23 @@ class Tokenizer
         return !feof($this->inputFile);
     }
 
-    public function advance(): string
+    public function advance(): void
     {
         foreach ($this->keywords as $word) {
             if ($this->isNextString($word)) {
                 $this->tokenType = self::KEYWORD;
+                $this->currentToken = $this->readString($word);
 
-                return $this->currentToken = $this->readString($word);
+                return;
             }
         }
 
         foreach ($this->symbols as $symbol) {
             if ($this->isNextString($symbol)) {
                 $this->tokenType = self::SYMBOL;
+                $this->currentToken = $this->readString($symbol);
 
-                return $this->currentToken = $this->readString($symbol);
+                return;
             }
         }
 
@@ -82,18 +86,18 @@ class Tokenizer
             $this->currentToken = $this->readUntilChar('"');
             fseek($this->inputFile, 1, SEEK_CUR);
 
-            return $this->currentToken;
+            return;
         }
 
         if ($this->isInt()) {
             $this->tokenType = self::INT_CONST;
+            $this->currentToken = $this->readInt();
 
-            return $this->currentToken = $this->readInt();
+            return;
         }
 
         $this->tokenType = self::IDENTIFIER;
-
-        return $this->currentToken = $this->readUntilRegex('/[^a-zA-Z0-9_]/');
+        $this->currentToken = $this->readUntilRegex('/[^a-zA-Z0-9_]/');
     }
 
     public function tokenType(): int
@@ -207,48 +211,37 @@ class Tokenizer
         while (true) {
             $char = fgetc($this->inputFile);
 
-            // EOF
-            if ($char === false) return;
+            if (in_array($char, $whitespaceChars)) continue;
 
-            // string literal
-            if ($char === '"') break;
-
-            // not a comment
-            if ($char !== '/') {
-                if (in_array($char, $whitespaceChars)) continue;
-
-                break;
+            if ($char === '/' && $this->isNextString('/')) {
+                $this->skipLine();
+                continue;
             }
 
-            $nextChar = fgetc($this->inputFile);
-            if ($nextChar === '/') {
-                // single-line comment -- skip line
-                fgets($this->inputFile);
-            } else if ($nextChar === '*') {
-                // multi-line comment -- skip until end of comment
+            if ($char === '/' && $this->isNextString('*')) {
                 $this->skipMultilineComment();
-            } else {
-                // not a comment -- go back 1 and break
-                fseek($this->inputFile, -1, SEEK_CUR);
-                break;
+                continue;
             }
-        }
 
-        // found token -- go back 1 char
-        fseek($this->inputFile, -1, SEEK_CUR);
+            // found token -- go back 1 char if not EOF then return
+            if ($char !== false) fseek($this->inputFile, -1, SEEK_CUR);
+            return;
+        }
     }
 
-    private function skipMultilineComment()
+    private function skipLine(): void
+    {
+        fgets($this->inputFile);
+    }
+
+    private function skipMultilineComment(): void
     {
         while (true) {
             $char = fgetc($this->inputFile);
 
-            if ($char === '*') {
-                if (fgetc($this->inputFile) === '/') {
-                    return;
-                } else {
-                    fseek($this->inputFile, -1, SEEK_CUR);
-                }
+            if ($char === '*' && $this->isNextString('/')) {
+                fgetc($this->inputFile);
+                return;
             }
         }
     }
