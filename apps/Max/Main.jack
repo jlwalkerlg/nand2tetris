@@ -1,0 +1,43 @@
+class Main {
+    function void main() {
+        var List numbers;
+        var int n;
+        var bool exit;
+        var int result;
+
+        let exit = false;
+
+        do Output.printString("Enter numbers then press enter to calculate max...");
+        do Output.println();
+
+        while (~(exit)) {
+            let n = Keyboard.readInt("> ");
+
+            if (~(n = 0)) {
+                if (numbers = null) {
+                    let numbers = List.new(n, null);
+                } else {
+                    let numbers = numbers.push(n);
+                }
+
+                do Output.println();
+            } else {
+                let exit = true;
+            }
+        }
+
+        let result = numbers.max();
+
+        do Output.printString("Calculating max of: ");
+        do numbers.print(", ");
+        do Output.printString("...");
+        do Output.println();
+        do Output.printString("Result: ");
+        do Output.printInt(result);
+        do Output.println();
+
+        do numbers.dispose();
+
+        return;
+    }
+}

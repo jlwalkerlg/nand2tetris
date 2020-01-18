@@ -1,0 +1,55 @@
+class List {
+    field int data;
+    field List next;
+
+    constructor List new(int car, List cdr) {
+        let data = car;
+        let next = cdr;
+
+        return this;
+    }
+
+    method void dispose() {
+        if (~(next = null)) {
+            do next.dispose();
+        }
+
+        do Memory.deAlloc(this);
+
+        return;
+    }
+
+    method List getData() { return data; }
+    method List getNext() { return next; }
+
+    method List push(int x) {
+        return List.new(x, this);
+    }
+
+    method void print(String delimeter) {
+        if (~(next = null)) {
+            do next.print(delimeter);
+            do Output.printString(delimeter);
+        }
+
+        do Output.printInt(data);
+
+        return;
+    }
+
+    method int max() {
+        var int max;
+
+        if (next = null) {
+            return data;
+        }
+
+        let max = next.max();
+
+        if (data > max) {
+            return data;
+        }
+
+        return max;
+    }
+}
