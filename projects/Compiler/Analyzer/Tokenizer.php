@@ -47,6 +47,9 @@ class Tokenizer
 
     private $inputFile;
 
+    private $tokens = [];
+    private $pointers = [];
+
     public function __construct($inputFile)
     {
         $this->inputFile = $inputFile;
@@ -61,6 +64,11 @@ class Tokenizer
 
     public function advance(): void
     {
+        $this->tokens[] = $this->currentToken;
+        $this->pointers[] = ftell($this->inputFile);
+
+        $this->skipWhitespace();
+
         foreach ($this->keywords as $word) {
             if ($this->isNextString($word)) {
                 $this->tokenType = self::KEYWORD;
@@ -100,12 +108,18 @@ class Tokenizer
         $this->currentToken = $this->readUntilRegex('/[^a-zA-Z0-9_]/');
     }
 
+    public function back(): void
+    {
+        $this->currentToken = array_pop($this->tokens);
+        fseek($this->inputFile, array_pop($this->pointers));
+    }
+
     public function tokenType(): int
     {
         return $this->tokenType;
     }
 
-    public function keyWord(): int
+    public function keyword(): int
     {
         $keyword = strtoupper($this->currentToken);
 
