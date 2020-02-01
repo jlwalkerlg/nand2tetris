@@ -6,14 +6,26 @@ class SubroutineCallCompiler extends CompilationModule
 {
     public function compile(): void
     {
-        $this->engine->compileIdentifier();
+        $identifier = $this->tokenizer->identifier();
+
+        $this->tokenizer->advance();
+        $symbol = $this->tokenizer->symbol();
+        $this->tokenizer->back();
+
+        // subroutine or class/variable
+        if ($symbol !== '.') {
+            $this->engine->compileIdentifier('subroutine');
+        } else {
+            $isClass = $this->symbolTable->has($identifier);
+            $this->engine->compileIdentifier($isClass ? 'class' : null);
+        }
 
         $this->tokenizer->advance();
         $this->engine->compileSymbol();
 
-        if ($this->tokenizer->symbol() === '.') {
+        if ($symbol === '.') {
             $this->tokenizer->advance();
-            $this->engine->compileIdentifier();
+            $this->engine->compileIdentifier('subroutine');
 
             $this->tokenizer->advance();
             $this->engine->compileSymbol();

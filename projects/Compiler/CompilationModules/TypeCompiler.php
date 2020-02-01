@@ -15,7 +15,7 @@ class TypeCompiler extends CompilationModule
         if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && array_key_exists($this->tokenizer->keyword(), $this->map)) {
             $this->writer->writeTag('keyword', $this->map[$this->tokenizer->keyword()]);
         } else {
-            $this->engine->compileIdentifier();
+            $this->engine->compileIdentifier('class');
         }
     }
 }

@@ -12,7 +12,7 @@ class ClassCompiler extends CompilationModule
         $this->writer->writeTag('keyword', 'class');
 
         $this->tokenizer->advance();
-        $this->engine->compileIdentifier();
+        $this->engine->compileIdentifier('class');
 
         $this->tokenizer->advance();
         $this->engine->compileSymbol();

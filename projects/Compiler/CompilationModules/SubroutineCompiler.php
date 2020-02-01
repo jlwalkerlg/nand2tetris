@@ -24,7 +24,7 @@ class SubroutineCompiler extends CompilationModule
         }
 
         $this->tokenizer->advance();
-        $this->engine->compileIdentifier();
+        $this->engine->compileIdentifier('subroutine');
 
         $this->tokenizer->advance();
         $this->engine->compileSymbol();
@@ -36,8 +36,32 @@ class SubroutineCompiler extends CompilationModule
         $this->engine->compileSymbol();
 
         $this->tokenizer->advance();
-        $this->engine->compileSubroutineBody();
+        $this->compileSubroutineBody();
 
         $this->writer->writeClosingTag('subroutineDec');
+    }
+
+    private function compileSubroutineBody(): void
+    {
+        $this->writer->writeOpeningTag('subroutineBody');
+
+        $this->engine->compileSymbol();
+
+        while (true) {
+            $this->tokenizer->advance();
+
+            if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VAR) {
+                $this->engine->compileVarDec();
+            } else {
+                break;
+            }
+        }
+
+        $this->engine->compileStatements();
+
+        $this->tokenizer->advance();
+        $this->engine->compileSymbol();
+
+        $this->writer->writeClosingTag('subroutineBody');
     }
 }

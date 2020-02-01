@@ -14,10 +14,31 @@ class StatementsCompiler extends CompilationModule
                 break;
             }
 
-            $this->engine->compileStatement();
+            $this->compileStatement();
             $this->tokenizer->advance();
         }
 
         $this->writer->writeClosingTag('statements');
+    }
+
+    public function compileStatement(): void
+    {
+        switch ($this->tokenizer->keyword()) {
+            case JackTokenizer::LET:
+                $this->engine->compileLet();
+                break;
+            case JackTokenizer::IF:
+                $this->engine->compileIf();
+                break;
+            case JackTokenizer::WHILE:
+                $this->engine->compileWhile();
+                break;
+            case JackTokenizer::DO:
+                $this->engine->compileDo();
+                break;
+            case JackTokenizer::RETURN:
+                $this->engine->compileReturn();
+                break;
+        }
     }
 }

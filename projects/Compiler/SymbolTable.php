@@ -24,7 +24,7 @@ class SymbolTable
         $this->subroutineTable = [];
     }
 
-    private function getTable(string $kind): array
+    private function &getTable(string $kind): array
     {
         if ($kind === 'static' || $kind === 'field') {
             return $this->classTable;
@@ -35,7 +35,7 @@ class SymbolTable
 
     public function define(string $name, string $type, string $kind): void
     {
-        $table = $this->getTable($kind);
+        $table = &$this->getTable($kind);
 
         $index = $this->varCount($kind);
 
@@ -46,9 +46,14 @@ class SymbolTable
         ];
     }
 
+    public function has(string $name): bool
+    {
+        return (array_key_exists($name, $this->subroutineTable) || array_key_exists($name, $this->classTable));
+    }
+
     public function varCount(string $kind): int
     {
-        $table = $this->getTable($kind);
+        $table = &$this->getTable($kind);
 
         $count = 0;
         foreach ($table as $entry) {
