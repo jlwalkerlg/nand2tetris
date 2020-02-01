@@ -15,12 +15,12 @@ class XmlStream
     {
         $this->writeIndents();
         fwrite($this->outputFile, "<{$tag}>\n");
-        $this->indent += 4;
+        $this->indent += 2;
     }
 
     public function writeClosingTag(string $tag): void
     {
-        $this->indent -= 4;
+        $this->indent -= 2;
         $this->writeIndents();
         fwrite($this->outputFile, "</{$tag}>\n");
     }
