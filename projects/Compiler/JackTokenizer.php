@@ -1,6 +1,6 @@
 <?php
 
-class Tokenizer
+class JackTokenizer
 {
     // Token types.
     const KEYWORD = 1;

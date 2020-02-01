@@ -1,16 +1,16 @@
 <?php
 
-require_once __DIR__ . '/Tokenizer.php';
+require_once __DIR__ . '/JackTokenizer.php';
 require_once __DIR__ . '/CompilationEngine.php';
 
 if ($argc !== 2 || !file_exists($argv[1])) {
-    exit('Usage: "php Analyzer.php [input]" where input is path to a .jack file or a diirectory containing one or more .jack files.');
+    exit('Usage: "php JackAnalyzer.php [input]" where input is path to a .jack file or a diirectory containing one or more .jack files.');
 }
 
-$analyzer = new Analyzer;
+$analyzer = new JackAnalyzer;
 $analyzer->run($argv[1]);
 
-class Analyzer
+class JackAnalyzer
 {
     private $prefix = 'JW_';
 
@@ -22,7 +22,7 @@ class Analyzer
             $inputFile = fopen($inputFilename, 'r');
             $outputFile = fopen($outputFilename, 'w');
 
-            $tokenizer = new Tokenizer($inputFile);
+            $tokenizer = new JackTokenizer($inputFile);
             $compilationEngine = new CompilationEngine($tokenizer, $outputFile);
 
             $compilationEngine->compileClass();
