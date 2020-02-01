@@ -1,21 +1,25 @@
 <?php
 
 require_once __DIR__ . '/JackTokenizer.php';
+require_once __DIR__ . '/VMWriter.php';
+require_once __DIR__ . '/SymbolTable.php';
 require_once __DIR__ . '/XmlStream.php';
 
 class CompilationEngine
 {
     private $tokenizer;
-    private $outputFile;
+    private $writer;
+    private $symbolTable;
     private $xmlWriter;
 
     private $modules = [];
 
-    public function __construct(JackTokenizer $tokenizer, $outputFile)
+    public function __construct(JackTokenizer $tokenizer, VMWriter $writer, SymbolTable $symbolTable, XmlStream $xmlWriter)
     {
         $this->tokenizer = $tokenizer;
-        $this->outputFile = $outputFile;
-        $this->xmlWriter = new XmlStream($this->outputFile);
+        $this->writer = $writer;
+        $this->symbolTable = $symbolTable;
+        $this->xmlWriter = $xmlWriter;
     }
 
     private function defer(string $module): void
@@ -23,7 +27,7 @@ class CompilationEngine
         if (!array_key_exists($module, $this->modules)) {
             $compilerName = $module . 'Compiler';
             require_once __DIR__ . "/CompilationModules/{$compilerName}.php";
-            $this->modules[$module] = new $compilerName($this->tokenizer, $this->xmlWriter, $this);
+            $this->modules[$module] = new $compilerName($this->tokenizer, $this->writer, $this->symbolTable, $this->xmlWriter, $this);
         }
 
         $this->modules[$module]->compile();

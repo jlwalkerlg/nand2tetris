@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/JackTokenizer.php';
 require_once __DIR__ . '/CompilationEngine.php';
+require_once __DIR__ . '/SymbolTable.php';
+require_once __DIR__ . '/VMWriter.php';
 
 if ($argc !== 2 || !file_exists($argv[1])) {
     exit('Usage: "php JackAnalyzer.php [input]" where input is path to a .jack file or a diirectory containing one or more .jack files.');
@@ -19,16 +21,18 @@ class JackAnalyzer
         $files = $this->getFiles($input);
 
         foreach ($files as $inputFilename => $outputFilename) {
-            $inputFile = fopen($inputFilename, 'r');
             $outputFile = fopen($outputFilename, 'w');
 
-            $tokenizer = new JackTokenizer($inputFile);
-            $compilationEngine = new CompilationEngine($tokenizer, $outputFile);
+            $tokenizer = new JackTokenizer($inputFilename);
+            $writer = new VMWriter($outputFile);
+            $symbolTable = new SymbolTable;
+            $xmlWriter = new XmlStream($outputFile);
+            $compilationEngine = new CompilationEngine($tokenizer, $writer, $symbolTable, $xmlWriter);
 
             $compilationEngine->compileClass();
 
-            fclose($inputFile);
-            fclose($outputFile);
+            $tokenizer->close();
+            $writer->close();
         }
     }
 

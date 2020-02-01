@@ -45,27 +45,32 @@ class JackTokenizer
     public $currentToken;
     private $tokenType;
 
-    private $inputFile;
+    private $file;
 
     private $tokens = [];
     private $pointers = [];
 
-    public function __construct($inputFile)
+    public function __construct(string $filename)
     {
-        $this->inputFile = $inputFile;
+        $this->file = fopen($filename, 'r');
+    }
+
+    public function close(): void
+    {
+        fclose($this->file);
     }
 
     public function hasMoreTokens(): bool
     {
         $this->skipWhitespace();
 
-        return !feof($this->inputFile);
+        return !feof($this->file);
     }
 
     public function advance(): void
     {
         $this->tokens[] = $this->currentToken;
-        $this->pointers[] = ftell($this->inputFile);
+        $this->pointers[] = ftell($this->file);
 
         $this->skipWhitespace();
 
@@ -90,9 +95,9 @@ class JackTokenizer
         if ($this->isNextString('"')) {
             $this->tokenType = self::STRING_CONST;
 
-            fseek($this->inputFile, 1, SEEK_CUR);
+            fseek($this->file, 1, SEEK_CUR);
             $this->currentToken = $this->readUntilChar('"');
-            fseek($this->inputFile, 1, SEEK_CUR);
+            fseek($this->file, 1, SEEK_CUR);
 
             return;
         }
@@ -111,7 +116,7 @@ class JackTokenizer
     public function back(): void
     {
         $this->currentToken = array_pop($this->tokens);
-        fseek($this->inputFile, array_pop($this->pointers));
+        fseek($this->file, array_pop($this->pointers));
     }
 
     public function tokenType(): int
@@ -152,15 +157,15 @@ class JackTokenizer
 
     private function isNextString(string $string): bool
     {
-        $position = ftell($this->inputFile);
-        $result = fread($this->inputFile, strlen($string)) === $string;
-        fseek($this->inputFile, $position);
+        $position = ftell($this->file);
+        $result = fread($this->file, strlen($string)) === $string;
+        fseek($this->file, $position);
         return $result;
     }
 
     private function readString(string $string): string
     {
-        return fread($this->inputFile, strlen($string));
+        return fread($this->file, strlen($string));
     }
 
     private function readUntilChar(string $match): string
@@ -168,10 +173,10 @@ class JackTokenizer
         $result = '';
 
         while (true) {
-            $char = fgetc($this->inputFile);
+            $char = fgetc($this->file);
 
             if ($char === $match) {
-                fseek($this->inputFile, -1, SEEK_CUR);
+                fseek($this->file, -1, SEEK_CUR);
                 return $result;
             }
 
@@ -181,8 +186,8 @@ class JackTokenizer
 
     private function isInt(): bool
     {
-        $result = is_numeric(fgetc($this->inputFile));
-        fseek($this->inputFile, -1, SEEK_CUR);
+        $result = is_numeric(fgetc($this->file));
+        fseek($this->file, -1, SEEK_CUR);
         return $result;
     }
 
@@ -191,10 +196,10 @@ class JackTokenizer
         $int = '';
 
         while (true) {
-            $char = fgetc($this->inputFile);
+            $char = fgetc($this->file);
 
             if (!is_numeric($char)) {
-                fseek($this->inputFile, -1, SEEK_CUR);
+                fseek($this->file, -1, SEEK_CUR);
                 return (int) $int;
             }
 
@@ -207,10 +212,10 @@ class JackTokenizer
         $result = '';
 
         while (true) {
-            $char = fgetc($this->inputFile);
+            $char = fgetc($this->file);
 
             if (preg_match($regex, $char) === 1) {
-                fseek($this->inputFile, -1, SEEK_CUR);
+                fseek($this->file, -1, SEEK_CUR);
                 return $result;
             }
 
@@ -221,7 +226,7 @@ class JackTokenizer
     private function skipWhitespace(): void
     {
         while (true) {
-            $char = fgetc($this->inputFile);
+            $char = fgetc($this->file);
 
             if (ctype_space($char)) continue;
 
@@ -236,23 +241,23 @@ class JackTokenizer
             }
 
             // found token -- go back 1 char if not EOF then return
-            if ($char !== false) fseek($this->inputFile, -1, SEEK_CUR);
+            if ($char !== false) fseek($this->file, -1, SEEK_CUR);
             return;
         }
     }
 
     private function skipLine(): void
     {
-        fgets($this->inputFile);
+        fgets($this->file);
     }
 
     private function skipMultilineComment(): void
     {
         while (true) {
-            $char = fgetc($this->inputFile);
+            $char = fgetc($this->file);
 
             if ($char === '*' && $this->isNextString('/')) {
-                fgetc($this->inputFile);
+                fgetc($this->file);
                 return;
             }
         }
