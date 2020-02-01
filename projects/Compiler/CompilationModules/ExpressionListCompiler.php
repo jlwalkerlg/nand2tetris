@@ -14,11 +14,14 @@ class ExpressionListCompiler extends CompilationModule
                     $this->tokenizer->back();
                     break;
                 }
-                $this->engine->compileSymbol();
-            } else {
-                $this->engine->compileExpression();
+
+                if ($this->tokenizer->symbol() === ',') {
+                    $this->engine->compileSymbol();
+                    $this->tokenizer->advance();
+                }
             }
 
+            $this->engine->compileExpression();
             $this->tokenizer->advance();
         }
 
