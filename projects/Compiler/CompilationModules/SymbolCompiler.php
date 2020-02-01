@@ -9,7 +9,7 @@ class SymbolCompiler extends CompilationModule
         '-' => '-',
         '*' => '*',
         '/' => '/',
-        '&' => '&',
+        '&' => '&amp;',
         '|' => '|',
         '<' => '&lt;',
         '>' => '&gt;',
