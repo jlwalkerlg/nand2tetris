@@ -9,6 +9,8 @@ class CompilationEngine
     private $outputFile;
     private $xmlWriter;
 
+    private $modules = [];
+
     public function __construct(JackTokenizer $tokenizer, $outputFile)
     {
         $this->tokenizer = $tokenizer;
@@ -16,547 +18,129 @@ class CompilationEngine
         $this->xmlWriter = new XmlStream($this->outputFile);
     }
 
+    private function defer(string $module): void
+    {
+        if (!array_key_exists($module, $this->modules)) {
+            $compilerName = $module . 'Compiler';
+            require_once __DIR__ . "/CompilationModules/{$compilerName}.php";
+            $this->modules[$module] = new $compilerName($this->tokenizer, $this->xmlWriter, $this);
+        }
+
+        $this->modules[$module]->compile();
+    }
+
     public function compileClass(): void
     {
-        $this->xmlWriter->writeOpeningTag('class');
-
-        $this->tokenizer->advance();
-        $this->xmlWriter->writeTag('keyword', 'class');
-
-        $this->tokenizer->advance();
-        $this->compileIdentifier();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        while ($this->tokenizer->hasMoreTokens()) {
-            $this->tokenizer->advance();
-
-            switch ($this->tokenizer->tokenType()) {
-                case JackTokenizer::KEYWORD:
-                    switch ($this->tokenizer->keyword()) {
-                        case JackTokenizer::CONSTRUCTOR:
-                        case JackTokenizer::FUNCTION:
-                        case JackTokenizer::METHOD:
-                            $this->compileSubroutine();
-                            break;
-                        case JackTokenizer::FIELD:
-                        case JackTokenizer::STATIC:
-                            $this->compileClassVarDec();
-                            break;
-                    }
-                    break;
-                case JackTokenizer::SYMBOL:
-                    $this->compileSymbol();
-                    break;
-            }
-        }
-
-        $this->xmlWriter->writeClosingTag('class');
+        $this->defer('Class');
     }
 
-    private function compileClassVarDec(): void
+    public function compileClassVarDec(): void
     {
-        $this->xmlWriter->writeOpeningTag('classVarDec');
-
-        switch ($this->tokenizer->keyword()) {
-            case JackTokenizer::FIELD:
-                $this->xmlWriter->writeTag('keyword', 'field');
-                break;
-            case JackTokenizer::STATIC:
-                $this->xmlWriter->writeTag('keyword', 'static');
-                break;
-        }
-
-        $this->tokenizer->advance();
-        $this->compileType();
-
-        $this->tokenizer->advance();
-        $this->compileIdentifier();
-
-        while (true) {
-            $this->tokenizer->advance();
-            $this->compileSymbol();
-
-            if ($this->tokenizer->symbol() === ';') break;
-
-            $this->tokenizer->advance();
-            $this->compileIdentifier();
-        }
-
-        $this->xmlWriter->writeClosingTag('classVarDec');
+        $this->defer('ClassVarDec');
     }
 
-    private function compileSubroutine(): void
+    public function compileSubroutine(): void
     {
-        $this->xmlWriter->writeOpeningTag('subroutineDec');
-
-        $map = [
-            JackTokenizer::CONSTRUCTOR => 'constructor',
-            JackTokenizer::FUNCTION => 'function',
-            JackTokenizer::METHOD => 'method',
-        ];
-
-        $this->xmlWriter->writeTag('keyword', $map[$this->tokenizer->keyword()]);
-
-        $this->tokenizer->advance();
-        if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VOID) {
-            $this->xmlWriter->writeTag('keyword', 'void');
-        } else {
-            $this->compileType();
-        }
-
-        $this->tokenizer->advance();
-        $this->compileIdentifier();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileParameterList();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileSubroutineBody();
-
-        $this->xmlWriter->writeClosingTag('subroutineDec');
+        $this->defer('Subroutine');
     }
 
-    private function compileParameterList(): void
+    public function compileParameterList(): void
     {
-        $this->xmlWriter->writeOpeningTag('parameterList');
-
-        while (true) {
-            if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
-                if ($this->tokenizer->symbol() === ')') {
-                    $this->tokenizer->back();
-                    break;
-                }
-                $this->compileSymbol();
-            } else {
-                $this->compileType();
-
-                $this->tokenizer->advance();
-                $this->compileIdentifier();
-            }
-
-            $this->tokenizer->advance();
-        }
-
-        $this->xmlWriter->writeClosingTag('parameterList');
+        $this->defer('ParameterList');
     }
 
-    private function compileVarDec(): void
+    public function compileVarDec(): void
     {
-        $this->xmlWriter->writeOpeningTag('varDec');
-
-        $this->xmlWriter->writeTag('keyword', 'var');
-
-        $this->tokenizer->advance();
-        $this->compileType();
-
-        $this->tokenizer->advance();
-        $this->compileIdentifier();
-
-        while (true) {
-            $this->tokenizer->advance();
-            $this->compileSymbol();
-
-            if ($this->tokenizer->symbol() === ';') break;
-
-            $this->tokenizer->advance();
-            $this->compileIdentifier();
-        }
-
-        $this->xmlWriter->writeClosingTag('varDec');
+        $this->defer('VarDec');
     }
 
-    private function compileStatements(): void
+    public function compileStatements(): void
     {
-        $this->xmlWriter->writeOpeningTag('statements');
-
-        while (true) {
-            if ($this->tokenizer->tokenType() !== JackTokenizer::KEYWORD) {
-                $this->tokenizer->back();
-                break;
-            }
-
-            $this->compileStatement();
-            $this->tokenizer->advance();
-        }
-
-        $this->xmlWriter->writeClosingTag('statements');
+        $this->defer('Statements');
     }
 
-    private function compileDo(): void
+    public function compileDo(): void
     {
-        $this->xmlWriter->writeOpeningTag('doStatement');
-
-        $this->xmlWriter->writeTag('keyword', 'do');
-
-        $this->tokenizer->advance();
-        $this->compileSubroutineCall();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->xmlWriter->writeClosingTag('doStatement');
+        $this->defer('Do');
     }
 
-    private function compileLet(): void
+    public function compileLet(): void
     {
-        $this->xmlWriter->writeOpeningTag('letStatement');
-
-        $this->xmlWriter->writeTag('keyword', 'let');
-
-        $this->tokenizer->advance();
-        $this->compileIdentifier();
-
-        $this->tokenizer->advance();
-        if ($this->tokenizer->symbol() !== '=') {
-            $this->compileSymbol();
-
-            $this->tokenizer->advance();
-            $this->compileExpression();
-
-            $this->tokenizer->advance();
-            $this->compileSymbol();
-
-            $this->tokenizer->advance();
-        }
-
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileExpression();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->xmlWriter->writeClosingTag('letStatement');
+        $this->defer('Let');
     }
 
-    private function compileWhile(): void
+    public function compileWhile(): void
     {
-        $this->xmlWriter->writeOpeningTag('whileStatement');
-
-        $this->xmlWriter->writeTag('keyword', 'while');
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileExpression();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileStatements();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->xmlWriter->writeClosingTag('whileStatement');
+        $this->defer('While');
     }
 
-    private function compileReturn(): void
+    public function compileReturn(): void
     {
-        $this->xmlWriter->writeOpeningTag('returnStatement');
-
-        $this->xmlWriter->writeTag('keyword', 'return');
-
-        $this->tokenizer->advance();
-        if ($this->tokenizer->tokenType() !== JackTokenizer::SYMBOL) {
-            $this->compileExpression();
-
-            $this->tokenizer->advance();
-        }
-
-        $this->compileSymbol();
-
-        $this->xmlWriter->writeClosingTag('returnStatement');
+        $this->defer('Return');
     }
 
-    private function compileIf(): void
+    public function compileIf(): void
     {
-        $this->xmlWriter->writeOpeningTag('ifStatement');
-
-        $this->xmlWriter->writeTag('keyword', 'if');
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileExpression();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->compileStatements();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->tokenizer->advance();
-        if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::ELSE) {
-            $this->xmlWriter->writeTag('keyword', 'else');
-
-            $this->tokenizer->advance();
-            $this->compileSymbol();
-
-            $this->tokenizer->advance();
-            $this->compileStatements();
-
-            $this->tokenizer->advance();
-            $this->compileSymbol();
-        } else {
-            $this->tokenizer->back();
-        }
-
-        $this->xmlWriter->writeClosingTag('ifStatement');
+        $this->defer('If');
     }
 
-    private function compileExpression(): void
+    public function compileExpression(): void
     {
-        $operators = ['+', '-', '*', '/', '&', '|', '<', '>', '='];
-
-        $this->xmlWriter->writeOpeningTag('expression');
-
-        $this->compileTerm();
-
-        $this->tokenizer->advance();
-        if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL && in_array($this->tokenizer->symbol(), $operators)) {
-            $this->compileSymbol();
-
-            $this->tokenizer->advance();
-            $this->compileTerm();
-        } else {
-            $this->tokenizer->back();
-        }
-
-        $this->xmlWriter->writeClosingTag('expression');
+        $this->defer('Expression');
     }
 
-    private function compileTerm(): void
+    public function compileTerm(): void
     {
-        $this->xmlWriter->writeOpeningTag('term');
-
-        switch ($this->tokenizer->tokenType()) {
-            case JackTokenizer::INT_CONST:
-                $this->compileIntConst();
-                break;
-            case JackTokenizer::STRING_CONST:
-                $this->compileStringConst();
-                break;
-            case JackTokenizer::KEYWORD:
-                $this->compileKeywordConst();
-                break;
-            case JackTokenizer::SYMBOL:
-                if ($this->tokenizer->symbol() === '(') {
-                    $this->compileSymbol();
-
-                    $this->tokenizer->advance();
-                    $this->compileExpression();
-
-                    $this->tokenizer->advance();
-                    $this->compileSymbol();
-                } else if ($this->tokenizer->symbol() === '-' || $this->tokenizer->symbol() === '~') {
-                    $this->compileSymbol();
-
-                    $this->tokenizer->advance();
-                    $this->compileTerm();
-                }
-                break;
-            case JackTokenizer::IDENTIFIER:
-                $this->tokenizer->advance();
-                if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL && $this->tokenizer->symbol() === '[') {
-                    // array access
-                    $this->tokenizer->back();
-
-                    $this->compileIdentifier();
-
-                    $this->tokenizer->advance();
-                    $this->compileSymbol();
-
-                    $this->tokenizer->advance();
-                    $this->compileExpression();
-
-                    $this->tokenizer->advance();
-                    $this->compileSymbol();
-                } else if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL && $this->tokenizer->symbol() === '.') {
-                    // subroutine call
-                    $this->tokenizer->back();
-                    $this->compileSubroutineCall();
-                } else {
-                    // just a var name
-                    $this->tokenizer->back();
-                    $this->compileIdentifier();
-                }
-                break;
-        }
-
-        $this->xmlWriter->writeClosingTag('term');
+        $this->defer('Term');
     }
 
-    private function compileExpressionList(): void
+    public function compileExpressionList(): void
     {
-        $this->xmlWriter->writeOpeningTag('expressionList');
-
-        while (true) {
-            if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
-                if ($this->tokenizer->symbol() === ')') {
-                    $this->tokenizer->back();
-                    break;
-                }
-                $this->compileSymbol();
-            } else {
-                $this->compileExpression();
-            }
-
-            $this->tokenizer->advance();
-        }
-
-        $this->xmlWriter->writeClosingTag('expressionList');
+        $this->defer('ExpressionList');
     }
 
-    private function compileSubroutineBody(): void
+    public function compileSubroutineBody(): void
     {
-        $this->xmlWriter->writeOpeningTag('subroutineBody');
-
-        $this->compileSymbol();
-
-        while (true) {
-            $this->tokenizer->advance();
-
-            if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VAR) {
-                $this->compileVarDec();
-            } else {
-                break;
-            }
-        }
-
-        $this->compileStatements();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        $this->xmlWriter->writeClosingTag('subroutineBody');
+        $this->defer('SubroutineBody');
     }
 
-    private function compileStatement(): void
+    public function compileStatement(): void
     {
-        switch ($this->tokenizer->keyword()) {
-            case JackTokenizer::LET:
-                $this->compileLet();
-                break;
-            case JackTokenizer::IF:
-                $this->compileIf();
-                break;
-            case JackTokenizer::WHILE:
-                $this->compileWhile();
-                break;
-            case JackTokenizer::DO:
-                $this->compileDo();
-                break;
-            case JackTokenizer::RETURN:
-                $this->compileReturn();
-                break;
-        }
+        $this->defer('Statement');
     }
 
-    private function compileSubroutineCall(): void
+    public function compileSubroutineCall(): void
     {
-        $this->compileIdentifier();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
-
-        if ($this->tokenizer->symbol() === '.') {
-            $this->tokenizer->advance();
-            $this->compileIdentifier();
-
-            $this->tokenizer->advance();
-            $this->compileSymbol();
-        }
-
-        $this->tokenizer->advance();
-        $this->compileExpressionList();
-
-        $this->tokenizer->advance();
-        $this->compileSymbol();
+        $this->defer('SubroutineCall');
     }
 
-    private function compileType(): void
+    public function compileType(): void
     {
-        $map = [
-            JackTokenizer::INT => 'int',
-            JackTokenizer::CHAR => 'char',
-            JackTokenizer::BOOLEAN => 'boolean',
-        ];
-
-        if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && array_key_exists($this->tokenizer->keyword(), $map)) {
-            $this->xmlWriter->writeTag('keyword', $map[$this->tokenizer->keyword()]);
-        } else {
-            $this->compileIdentifier();
-        }
+        $this->defer('Type');
     }
 
-    private function compileSymbol(): void
+    public function compileSymbol(): void
     {
-        $map = [
-            '+' => '+',
-            '-' => '-',
-            '*' => '*',
-            '/' => '/',
-            '&' => '&',
-            '|' => '|',
-            '<' => '&lt;',
-            '>' => '&gt;',
-            '=' => '=',
-        ];
-
-        $symbol = $this->tokenizer->symbol();
-        if (array_key_exists($symbol, $map)) {
-            $symbol = $map[$symbol];
-        }
-
-        $this->xmlWriter->writeTag('symbol', $symbol);
+        $this->defer('Symbol');
     }
 
-    private function compileIdentifier(): void
+    public function compileIdentifier(): void
     {
-        $this->xmlWriter->writeTag('identifier', $this->tokenizer->identifier());
+        $this->defer('Identifier');
     }
 
-    private function compileIntConst(): void
+    public function compileIntConst(): void
     {
-        $this->xmlWriter->writeTag('integerConstant', $this->tokenizer->intVal());
+        $this->defer('IntConst');
     }
 
-    private function compileStringConst(): void
+    public function compileStringConst(): void
     {
-        $this->xmlWriter->writeTag('stringConstant', $this->tokenizer->stringVal());
+        $this->defer('StringConst');
     }
 
-    private function compileKeywordConst(): void
+    public function compileKeywordConst(): void
     {
-        $map = [
-            JackTokenizer::TRUE => 'true',
-            JackTokenizer::FALSE => 'false',
-            JackTokenizer::NULL => 'null',
-            JackTokenizer::THIS => 'this',
-        ];
-
-        $this->xmlWriter->writeTag('keyword', $map[$this->tokenizer->keyword()]);
+        $this->defer('KeywordConst');
     }
 }
