@@ -12,9 +12,11 @@ class VarDecCompiler extends CompilationModule
         JackTokenizer::BOOLEAN => 'boolean',
     ];
 
-    public function compile(): void
+    public function compile()
     {
         // var
+
+        $nVars = 0;
 
         $this->tokenizer->advance(); // type
         if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD) {
@@ -27,13 +29,14 @@ class VarDecCompiler extends CompilationModule
         $varName = $this->tokenizer->identifier();
 
         $this->symbolTable->define($varName, $type, 'var');
+        $nVars++;
 
         $this->tokenizer->advance(); // ,|;
 
         while (true) {
             if ($this->tokenizer->symbol() === ';') {
                 $this->tokenizer->advance();
-                return;
+                return $nVars;
             }
 
             // ,
@@ -43,6 +46,7 @@ class VarDecCompiler extends CompilationModule
             $this->symbolTable->define($varName, $type, 'var');
 
             $this->tokenizer->advance();
+            $nVars++;
         }
     }
 }

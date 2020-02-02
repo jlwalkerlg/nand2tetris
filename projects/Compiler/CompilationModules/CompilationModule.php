@@ -38,12 +38,21 @@ abstract class CompilationModule
 
     protected function peek(int $n)
     {
-        for ($i = 0; $i < $n; $i++) {
+        if ($n < 0) {
+            for ($i = $n; $i < 0; $i++) {
+                $this->tokenizer->back();
+            }
+        }
+
+        for ($i = 0; $i < abs($n); $i++) {
             var_dump($this->tokenizer->currentToken);
             $this->tokenizer->advance();
         }
-        for ($i = 0; $i < $n; $i++) {
-            $this->tokenizer->back();
+
+        if ($n > 0) {
+            for ($i = 0; $i < $n; $i++) {
+                $this->tokenizer->back();
+            }
         }
     }
 }

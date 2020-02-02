@@ -16,21 +16,22 @@ class TermCompiler extends CompilationModule
             case JackTokenizer::KEYWORD:
                 return $this->compileKeywordConstant();
             case JackTokenizer::IDENTIFIER:
-                $identifier = $this->tokenizer->identifier();
-
                 $this->tokenizer->advance();
 
-                if ($this->tokenizer->tokenType() !== JackTokenizer::SYMBOL) {
-                    return $this->compileVarName($identifier);
-                }
+                if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
+                    if ($this->tokenizer->symbol() === '[') {
+                        $this->tokenizer->back();
+                        return $this->compileArrayAccess();
+                    }
 
-                if ($this->tokenizer->symbol() === '[') {
-                    return $this->compileArrayAccess($identifier);
+                    if ($this->tokenizer->symbol() === '(' || $this->tokenizer->symbol() === '.') {
+                        $this->tokenizer->back();
+                        return $this->engine->compileSubroutineCall();
+                    }
                 }
 
                 $this->tokenizer->back();
-                // subroutineCall
-                return $this->engine->compileSubroutineCall();
+                return $this->compileVarName();
             case JackTokenizer::SYMBOL:
                 if ($this->tokenizer->symbol() === '-') {
                     $this->tokenizer->advance(); // term
@@ -87,18 +88,25 @@ class TermCompiler extends CompilationModule
         $this->tokenizer->advance();
     }
 
-    private function compileVarName(string $varName)
+    private function compileVarName()
     {
+        // varName
+        $varName = $this->tokenizer->identifier();
+
         $segment = $this->symbolTable->kindOf($varName);
         $index = $this->symbolTable->indexOf($varName);
 
         $this->vmWriter->writePush($this->getSegment($segment), $index);
+
+        $this->tokenizer->advance();
     }
 
-    private function compileArrayAccess(string $varName)
+    private function compileArrayAccess()
     {
-        // [
+        // varName
+        $varName = $this->tokenizer->identifier();
 
+        $this->tokenizer->advance(); // [
         $this->tokenizer->advance(); // expression
 
         $this->engine->compileExpression(); // ]

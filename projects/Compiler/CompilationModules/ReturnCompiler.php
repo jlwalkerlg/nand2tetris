@@ -14,6 +14,9 @@ class ReturnCompiler extends CompilationModule
 
         if ($this->tokenizer->tokenType() !== JackTokenizer::SYMBOL || $this->tokenizer->symbol() !== ';') {
             $this->engine->compileExpression(); // ;
+        } else {
+            // void function
+            $this->vmWriter->writePush('constant', 0);
         }
 
         $this->vmWriter->writeReturn();

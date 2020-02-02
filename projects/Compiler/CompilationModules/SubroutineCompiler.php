@@ -16,11 +16,11 @@ class SubroutineCompiler extends CompilationModule
     {
         // constructor|function|method
 
-        $this->symbolTable->startSubroutine();
-
         $subroutineType = $this->map[$this->tokenizer->keyword()];
 
         $this->tokenizer->advance(); // void|int|char|boolean|ClassName
+
+        $this->symbolTable->startSubroutine();
 
         $this->tokenizer->advance(); // subroutineName
         $subroutineName = $this->tokenizer->identifier();
@@ -28,24 +28,18 @@ class SubroutineCompiler extends CompilationModule
         $this->tokenizer->advance(); // (
 
         $this->tokenizer->advance(); // parameterList
-        $nLocals = $this->engine->compileParameterList(); // )
+        $this->engine->compileParameterList(); // )
 
-        $this->vmWriter->writeFunction("{$class}.{$subroutineName}", $nLocals);
-
-        $this->tokenizer->advance(); // subroutineBody
-        $this->compileSubroutineBody();
-    }
-
-    // { varDec* statements }
-    private function compileSubroutineBody(): void
-    {
-        // {
+        $this->tokenizer->advance(); // {
 
         $this->tokenizer->advance(); // varDec|statements
 
+        $nLocals = 0;
         while ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VAR) {
-            $this->engine->compileVarDec(); // varDec|statements
+            $nLocals += $this->engine->compileVarDec(); // varDec|statements
         }
+
+        $this->vmWriter->writeFunction("{$class}.{$subroutineName}", $nLocals);
 
         $this->engine->compileStatements(); // }
 

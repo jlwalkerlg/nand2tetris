@@ -12,16 +12,14 @@ class ParameterListCompiler extends CompilationModule
         JackTokenizer::BOOLEAN => 'boolean',
     ];
 
-    public function compile(): int
+    public function compile()
     {
         // )|type
-
-        $nParams = 0;
 
         while (true) {
             if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
                 if ($this->tokenizer->symbol() === ')') {
-                    return $nParams;
+                    return;
                 }
             }
 
@@ -45,7 +43,6 @@ class ParameterListCompiler extends CompilationModule
             }
 
             $this->symbolTable->define($varName, $type, 'argument');
-            $nParams++;
         }
     }
 }

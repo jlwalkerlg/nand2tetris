@@ -69,7 +69,6 @@ class JackTokenizer
 
     public function advance(): void
     {
-        // var_dump($this->currentToken);
         $this->tokens[] = $this->currentToken;
         $this->pointers[] = ftell($this->file);
 
