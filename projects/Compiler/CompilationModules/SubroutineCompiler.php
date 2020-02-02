@@ -16,11 +16,11 @@ class SubroutineCompiler extends CompilationModule
     {
         // constructor|function|method
 
+        $this->symbolTable->startSubroutine();
+
         $subroutineType = $this->map[$this->tokenizer->keyword()];
 
         $this->tokenizer->advance(); // void|int|char|boolean|ClassName
-
-        $this->symbolTable->startSubroutine();
 
         $this->tokenizer->advance(); // subroutineName
         $subroutineName = $this->tokenizer->identifier();
@@ -40,6 +40,22 @@ class SubroutineCompiler extends CompilationModule
         }
 
         $this->vmWriter->writeFunction("{$class}.{$subroutineName}", $nLocals);
+
+        if ($subroutineType === 'constructor' || $subroutineType === 'method') {
+            $this->symbolTable->define('this', $class, 'argument');
+        }
+
+        if ($subroutineType === 'constructor') {
+            $nFields = $this->symbolTable->varCount('field');
+            $this->vmWriter->writePush('constant', $nFields);
+            $this->vmWriter->writeCall('Memory.alloc', 1);
+            $this->vmWriter->writePop('pointer', 0);
+        }
+
+        if ($subroutineType === 'method') {
+            $this->vmWriter->writePush('argument', 0);
+            $this->vmWriter->writePop('pointer', 0);
+        }
 
         $this->engine->compileStatements(); // }
 
