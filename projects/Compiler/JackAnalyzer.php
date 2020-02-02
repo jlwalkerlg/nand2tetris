@@ -19,9 +19,11 @@ class JackAnalyzer
         $files = $this->getFiles($input);
 
         foreach ($files as $inputFilename => $outputBasename) {
+            $className = basename($inputFilename, '.jack');
+
             $tokenizer = new JackTokenizer($inputFilename);
             $writer = new VMWriter($outputBasename . '.vm');
-            $symbolTable = new SymbolTable;
+            $symbolTable = new SymbolTable($className);
             $xmlWriter = new XmlStream($outputBasename . '.xml');
             $compilationEngine = new CompilationEngine($tokenizer, $writer, $symbolTable, $xmlWriter);
 

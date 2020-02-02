@@ -16,8 +16,19 @@
 
 class SymbolTable
 {
+    private $className;
     private $classTable = [];
     private $subroutineTable = [];
+
+    public function __construct(string $className)
+    {
+        $this->className = $className;
+    }
+
+    public function getClassName(): string
+    {
+        return $this->className;
+    }
 
     public function startSubroutine(): void
     {
