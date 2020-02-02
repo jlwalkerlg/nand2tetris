@@ -76,10 +76,16 @@ class JackTokenizer
 
         foreach ($this->keywords as $word) {
             if ($this->isNextString($word)) {
-                $this->tokenType = self::KEYWORD;
-                $this->currentToken = $this->readString($word);
+                fseek($this->file, strlen($word), SEEK_CUR);
+                $char = fgetc($this->file);
+                fseek($this->file, - (strlen($word) + 1), SEEK_CUR);
 
-                return;
+                if (!preg_match('/[a-zA-Z0-9_]/', $char)) {
+                    $this->tokenType = self::KEYWORD;
+                    $this->currentToken = $this->readString($word);
+
+                    return;
+                }
             }
         }
 
