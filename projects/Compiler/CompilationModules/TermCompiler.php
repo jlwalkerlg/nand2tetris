@@ -63,7 +63,19 @@ class TermCompiler extends CompilationModule
 
     private function compileStringConstant()
     {
-        $this->vmWriter->writePush('constant', $this->tokenizer->intVal());
+        $string = $this->tokenizer->stringVal();
+        $len = strlen($string);
+
+        // create new string object, leave base addr on stack
+        $this->vmWriter->writePush('constant', $len);
+        $this->vmWriter->writeCall('String.new', 1);
+
+        // append each char to string object
+        for ($i = 0; $i < $len; $i++) {
+            $this->vmWriter->writePush('constant', ord($string[$i]));
+            $this->vmWriter->writeCall('String.appendChar', 2);
+        }
+
         $this->tokenizer->advance();
     }
 
@@ -117,7 +129,7 @@ class TermCompiler extends CompilationModule
         $this->vmWriter->writePush($this->getSegment($segment), $index);
         $this->vmWriter->writeArithmetic('add');
         $this->vmWriter->writePop('pointer', 1);
-        $this->vmWriter->writePush('pointer', 1);
+        $this->vmWriter->writePush('that', 0);
 
         $this->tokenizer->advance();
     }
