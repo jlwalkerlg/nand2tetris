@@ -10,16 +10,14 @@ class CompilationEngine
     private $tokenizer;
     private $writer;
     private $symbolTable;
-    private $xmlWriter;
 
     private $modules = [];
 
-    public function __construct(JackTokenizer $tokenizer, VMWriter $writer, SymbolTable $symbolTable, XmlStream $xmlWriter)
+    public function __construct(JackTokenizer $tokenizer, VMWriter $writer, SymbolTable $symbolTable)
     {
         $this->tokenizer = $tokenizer;
         $this->writer = $writer;
         $this->symbolTable = $symbolTable;
-        $this->xmlWriter = $xmlWriter;
     }
 
     private function defer(string $module, ...$args)
@@ -27,7 +25,7 @@ class CompilationEngine
         if (!array_key_exists($module, $this->modules)) {
             $compilerName = $module . 'Compiler';
             require_once __DIR__ . "/CompilationModules/{$compilerName}.php";
-            $this->modules[$module] = new $compilerName($this->tokenizer, $this->writer, $this->symbolTable, $this->xmlWriter, $this);
+            $this->modules[$module] = new $compilerName($this->tokenizer, $this->writer, $this->symbolTable, $this);
         }
 
         return $this->modules[$module]->compile(...$args);
@@ -106,30 +104,5 @@ class CompilationEngine
     public function compileSubroutineCall(...$args)
     {
         return $this->defer('SubroutineCall', ...$args);
-    }
-
-    public function compileType(...$args)
-    {
-        return $this->defer('Type', ...$args);
-    }
-
-    public function compileSymbol(...$args)
-    {
-        return $this->defer('Symbol', ...$args);
-    }
-
-    public function compileIdentifier(...$args)
-    {
-        return $this->defer('Identifier', ...$args);
-    }
-
-    public function compileIntConst(...$args)
-    {
-        return $this->defer('IntConst', ...$args);
-    }
-
-    public function compileStringConst(...$args)
-    {
-        return $this->defer('StringConst', ...$args);
     }
 }

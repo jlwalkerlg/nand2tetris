@@ -16,14 +16,14 @@ class IfCompiler extends CompilationModule
         $this->tokenizer->advance(); // (
         $this->tokenizer->advance(); // expression
         $this->engine->compileExpression();
-        $this->vmWriter->writeArithmetic('not');
-        $this->vmWriter->writeIf($l1);
+        $this->writer->writeArithmetic('not');
+        $this->writer->writeIf($l1);
         $this->tokenizer->advance(); // )
         $this->tokenizer->advance(); // {
         $this->engine->compileStatements(); // }
-        $this->vmWriter->writeGoto($l2);
+        $this->writer->writeGoto($l2);
 
-        $this->vmWriter->writeLabel($l1);
+        $this->writer->writeLabel($l1);
 
         $this->tokenizer->advance(); // else?
         if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::ELSE) {
@@ -33,6 +33,6 @@ class IfCompiler extends CompilationModule
             $this->tokenizer->advance();
         }
 
-        $this->vmWriter->writeLabel($l2);
+        $this->writer->writeLabel($l2);
     }
 }

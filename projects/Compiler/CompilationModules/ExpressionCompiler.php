@@ -39,13 +39,13 @@ class ExpressionCompiler extends CompilationModule
     private function compileOperator(string $operator)
     {
         if ($operator === '*') {
-            return $this->vmWriter->writeCall('Math.multiply', 2);
+            return $this->writer->writeCall('Math.multiply', 2);
         }
 
         if ($operator === '/') {
-            return $this->vmWriter->writeCall('Math.divide', 2);
+            return $this->writer->writeCall('Math.divide', 2);
         }
 
-        $this->vmWriter->writeArithmetic($this->ops[$operator]);
+        $this->writer->writeArithmetic($this->ops[$operator]);
     }
 }

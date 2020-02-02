@@ -19,12 +19,12 @@ class SubroutineCallCompiler extends CompilationModule
             $nArgs = 1;
             $className = $this->symbolTable->getClassName();
             $subroutineName = $identifier;
-            $this->vmWriter->writePush('pointer', 0);
+            $this->writer->writePush('pointer', 0);
 
             $this->tokenizer->advance(); // expressionList
             $nArgs += $this->engine->compileExpressionList(); // )
 
-            $this->vmWriter->writeCall("{$className}.{$subroutineName}", $nArgs);
+            $this->writer->writeCall("{$className}.{$subroutineName}", $nArgs);
         } else {
             // .
             $this->tokenizer->advance(); // subroutineName
@@ -36,7 +36,7 @@ class SubroutineCallCompiler extends CompilationModule
                 $className = $this->symbolTable->typeOf($identifier);
                 $kind = $this->symbolTable->kindOf($identifier);
                 $index = $this->symbolTable->indexOf($identifier);
-                $this->vmWriter->writePush($this->getSegment($kind), $index);
+                $this->writer->writePush($this->getSegment($kind), $index);
                 $nArgs = 1;
             } else {
                 $className = $identifier;
@@ -47,7 +47,7 @@ class SubroutineCallCompiler extends CompilationModule
             $this->tokenizer->advance(); // expressionList
             $nArgs += $this->engine->compileExpressionList(); // )
 
-            $this->vmWriter->writeCall("{$className}.{$subroutineName}", $nArgs);
+            $this->writer->writeCall("{$className}.{$subroutineName}", $nArgs);
         }
     }
 }

@@ -16,6 +16,6 @@ class DoCompiler extends CompilationModule
 
         $this->tokenizer->advance();
 
-        $this->vmWriter->writePop('temp', 0);
+        $this->writer->writePop('temp', 0);
     }
 }

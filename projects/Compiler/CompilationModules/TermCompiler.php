@@ -36,14 +36,14 @@ class TermCompiler extends CompilationModule
                 if ($this->tokenizer->symbol() === '-') {
                     $this->tokenizer->advance(); // term
                     $this->engine->compileTerm();
-                    $this->vmWriter->writeArithmetic('neg');
+                    $this->writer->writeArithmetic('neg');
                     return;
                 }
 
                 if ($this->tokenizer->symbol() === '~') {
                     $this->tokenizer->advance(); // term
                     $this->engine->compileTerm();
-                    $this->vmWriter->writeArithmetic('not');
+                    $this->writer->writeArithmetic('not');
                     return;
                 }
 
@@ -57,7 +57,7 @@ class TermCompiler extends CompilationModule
 
     private function compileIntegerConstant()
     {
-        $this->vmWriter->writePush('constant', $this->tokenizer->intVal());
+        $this->writer->writePush('constant', $this->tokenizer->intVal());
         $this->tokenizer->advance();
     }
 
@@ -67,13 +67,13 @@ class TermCompiler extends CompilationModule
         $len = strlen($string);
 
         // create new string object, leave base addr on stack
-        $this->vmWriter->writePush('constant', $len);
-        $this->vmWriter->writeCall('String.new', 1);
+        $this->writer->writePush('constant', $len);
+        $this->writer->writeCall('String.new', 1);
 
         // append each char to string object
         for ($i = 0; $i < $len; $i++) {
-            $this->vmWriter->writePush('constant', ord($string[$i]));
-            $this->vmWriter->writeCall('String.appendChar', 2);
+            $this->writer->writePush('constant', ord($string[$i]));
+            $this->writer->writeCall('String.appendChar', 2);
         }
 
         $this->tokenizer->advance();
@@ -83,17 +83,17 @@ class TermCompiler extends CompilationModule
     {
         switch ($this->tokenizer->keyword()) {
             case JackTokenizer::TRUE:
-                $this->vmWriter->writePush('constant', 1);
-                $this->vmWriter->writeArithmetic('neg');
+                $this->writer->writePush('constant', 1);
+                $this->writer->writeArithmetic('neg');
                 break;
             case JackTokenizer::FALSE:
-                $this->vmWriter->writePush('constant', 0);
+                $this->writer->writePush('constant', 0);
                 break;
             case JackTokenizer::NULL:
-                $this->vmWriter->writePush('constant', 0);
+                $this->writer->writePush('constant', 0);
                 break;
             case JackTokenizer::THIS:
-                $this->vmWriter->writePush('pointer', 0);
+                $this->writer->writePush('pointer', 0);
                 break;
         }
 
@@ -108,7 +108,7 @@ class TermCompiler extends CompilationModule
         $segment = $this->symbolTable->kindOf($varName);
         $index = $this->symbolTable->indexOf($varName);
 
-        $this->vmWriter->writePush($this->getSegment($segment), $index);
+        $this->writer->writePush($this->getSegment($segment), $index);
 
         $this->tokenizer->advance();
     }
@@ -126,10 +126,10 @@ class TermCompiler extends CompilationModule
         $segment = $this->symbolTable->kindOf($varName);
         $index = $this->symbolTable->indexOf($varName);
 
-        $this->vmWriter->writePush($this->getSegment($segment), $index);
-        $this->vmWriter->writeArithmetic('add');
-        $this->vmWriter->writePop('pointer', 1);
-        $this->vmWriter->writePush('that', 0);
+        $this->writer->writePush($this->getSegment($segment), $index);
+        $this->writer->writeArithmetic('add');
+        $this->writer->writePop('pointer', 1);
+        $this->writer->writePush('that', 0);
 
         $this->tokenizer->advance();
     }

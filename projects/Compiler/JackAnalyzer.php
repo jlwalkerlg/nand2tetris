@@ -24,14 +24,12 @@ class JackAnalyzer
             $tokenizer = new JackTokenizer($inputFilename);
             $writer = new VMWriter($outputBasename . '.vm');
             $symbolTable = new SymbolTable($className);
-            $xmlWriter = new XmlStream($outputBasename . '.xml');
-            $compilationEngine = new CompilationEngine($tokenizer, $writer, $symbolTable, $xmlWriter);
+            $compilationEngine = new CompilationEngine($tokenizer, $writer, $symbolTable);
 
             $compilationEngine->compileClass();
 
             $tokenizer->close();
             $writer->close();
-            $xmlWriter->close();
         }
     }
 

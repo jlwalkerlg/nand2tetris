@@ -15,21 +15,21 @@ class WhileCompiler extends CompilationModule
 
         $this->tokenizer->advance(); // (
 
-        $this->vmWriter->writeLabel($l1);
+        $this->writer->writeLabel($l1);
 
         $this->tokenizer->advance(); // expression
         $this->engine->compileExpression(); // )
-        $this->vmWriter->writeArithmetic('not');
+        $this->writer->writeArithmetic('not');
 
-        $this->vmWriter->writeIf($l2);
+        $this->writer->writeIf($l2);
 
         $this->tokenizer->advance(); // {
 
         $this->tokenizer->advance(); // statements
         $this->engine->compileStatements(); // }
 
-        $this->vmWriter->writeGoto($l1);
-        $this->vmWriter->writeLabel($l2);
+        $this->writer->writeGoto($l1);
+        $this->writer->writeLabel($l2);
 
         $this->tokenizer->advance();
     }

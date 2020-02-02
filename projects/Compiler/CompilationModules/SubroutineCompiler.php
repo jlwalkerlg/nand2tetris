@@ -43,18 +43,18 @@ class SubroutineCompiler extends CompilationModule
             $nLocals += $this->engine->compileVarDec(); // varDec|statements
         }
 
-        $this->vmWriter->writeFunction("{$class}.{$subroutineName}", $nLocals);
+        $this->writer->writeFunction("{$class}.{$subroutineName}", $nLocals);
 
         if ($subroutineType === 'constructor') {
             $nFields = $this->symbolTable->varCount('field');
-            $this->vmWriter->writePush('constant', $nFields);
-            $this->vmWriter->writeCall('Memory.alloc', 1);
-            $this->vmWriter->writePop('pointer', 0);
+            $this->writer->writePush('constant', $nFields);
+            $this->writer->writeCall('Memory.alloc', 1);
+            $this->writer->writePop('pointer', 0);
         }
 
         if ($subroutineType === 'method') {
-            $this->vmWriter->writePush('argument', 0);
-            $this->vmWriter->writePop('pointer', 0);
+            $this->writer->writePush('argument', 0);
+            $this->writer->writePop('pointer', 0);
         }
 
         $this->engine->compileStatements(); // }

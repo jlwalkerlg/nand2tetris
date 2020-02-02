@@ -9,17 +9,15 @@ abstract class CompilationModule
     static $labelCount = 0;
 
     protected $tokenizer;
-    protected $vmWriter;
-    protected $symbolTable;
     protected $writer;
+    protected $symbolTable;
     protected $engine;
 
-    public function __construct(JackTokenizer $tokenizer, VMWriter $vmWriter, SymbolTable $symbolTable, XmlStream $writer, CompilationEngine $engine)
+    public function __construct(JackTokenizer $tokenizer, VMWriter $writer, SymbolTable $symbolTable, CompilationEngine $engine)
     {
         $this->tokenizer = $tokenizer;
-        $this->vmWriter = $vmWriter;
-        $this->symbolTable = $symbolTable;
         $this->writer = $writer;
+        $this->symbolTable = $symbolTable;
         $this->engine = $engine;
     }
 

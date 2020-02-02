@@ -16,10 +16,10 @@ class ReturnCompiler extends CompilationModule
             $this->engine->compileExpression(); // ;
         } else {
             // void function
-            $this->vmWriter->writePush('constant', 0);
+            $this->writer->writePush('constant', 0);
         }
 
-        $this->vmWriter->writeReturn();
+        $this->writer->writeReturn();
 
         $this->tokenizer->advance();
     }

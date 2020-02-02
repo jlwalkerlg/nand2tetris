@@ -24,8 +24,8 @@ class LetCompiler extends CompilationModule
             $this->engine->compileExpression(); // ]
 
             // leave array index at top of stack
-            $this->vmWriter->writePush($this->getSegment($segment), $index);
-            $this->vmWriter->writeArithmetic('add');
+            $this->writer->writePush($this->getSegment($segment), $index);
+            $this->writer->writeArithmetic('add');
 
             $this->tokenizer->advance();
         }
@@ -37,18 +37,18 @@ class LetCompiler extends CompilationModule
 
         if ($isArray) {
             // put result of expression in temp
-            $this->vmWriter->writePop('temp', 0);
+            $this->writer->writePop('temp', 0);
 
             // pop array index into pointer 1
-            $this->vmWriter->writePop('pointer', 1);
+            $this->writer->writePop('pointer', 1);
 
             // put result back on stack
-            $this->vmWriter->writePush('temp', 0);
+            $this->writer->writePush('temp', 0);
 
             // pop result into that 0
-            $this->vmWriter->writePop('that', 0);
+            $this->writer->writePop('that', 0);
         } else {
-            $this->vmWriter->writePop($this->getSegment($segment), $index);
+            $this->writer->writePop($this->getSegment($segment), $index);
         }
     }
 }
