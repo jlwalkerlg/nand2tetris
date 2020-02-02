@@ -10,34 +10,35 @@ class ParameterListCompiler extends CompilationModule
         JackTokenizer::BOOLEAN => 'boolean',
     ];
 
-    public function compile(): void
+    public function compile(): int
     {
-        $this->writer->writeOpeningTag('parameterList');
+        $nParams = 0;
 
         while (true) {
             if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
                 if ($this->tokenizer->symbol() === ')') {
                     $this->tokenizer->back();
-                    break;
+                    return $nParams;
                 }
-                $this->engine->compileSymbol();
-            } else {
-                if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD) {
-                    $type = $this->types[$this->tokenizer->keyword()];
-                } else {
-                    $type = $this->tokenizer->identifier();
-                }
-                $this->engine->compileType();
 
-                $this->tokenizer->advance();
-                $identifier = $this->tokenizer->identifier();
-                $this->symbolTable->define($identifier, $type, 'argument');
-                $this->engine->compileIdentifier('argument', true);
+                if ($this->tokenizer->symbol() === ',') {
+                    $this->tokenizer->advance();
+                }
+            }
+
+            if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD) {
+                $type = $this->types[$this->tokenizer->keyword()];
+            } else {
+                $type = $this->tokenizer->identifier();
             }
 
             $this->tokenizer->advance();
-        }
+            $varName = $this->tokenizer->identifier();
 
-        $this->writer->writeClosingTag('parameterList');
+            $nParams++;
+            $this->symbolTable->define($varName, $type, 'argument');
+
+            $this->tokenizer->advance();
+        }
     }
 }

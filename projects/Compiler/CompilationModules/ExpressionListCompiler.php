@@ -4,27 +4,25 @@ require_once __DIR__ . '/CompilationModule.php';
 
 class ExpressionListCompiler extends CompilationModule
 {
-    public function compile(): void
+    public function compile(): int
     {
-        $this->writer->writeOpeningTag('expressionList');
+        $nArgs = 0;
 
         while (true) {
             if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
                 if ($this->tokenizer->symbol() === ')') {
                     $this->tokenizer->back();
-                    break;
+                    return $nArgs;
                 }
 
                 if ($this->tokenizer->symbol() === ',') {
-                    $this->engine->compileSymbol();
                     $this->tokenizer->advance();
                 }
             }
 
+            $nArgs++;
             $this->engine->compileExpression();
             $this->tokenizer->advance();
         }
-
-        $this->writer->writeClosingTag('expressionList');
     }
 }

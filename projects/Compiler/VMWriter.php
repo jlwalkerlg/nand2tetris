@@ -4,9 +4,9 @@ class VMWriter
 {
     private $file;
 
-    public function __construct($file)
+    public function __construct(string $filename)
     {
-        $this->file = $file;
+        $this->file = fopen($filename, 'w');
     }
 
     public function writePush(string $segment, int $index): void
@@ -49,7 +49,7 @@ class VMWriter
         fwrite($this->file, "function {$name} {$nLocals}" . PHP_EOL);
     }
 
-    public function writeReturn(string $name, int $nLocals): void
+    public function writeReturn(): void
     {
         fwrite($this->file, "return" . PHP_EOL);
     }

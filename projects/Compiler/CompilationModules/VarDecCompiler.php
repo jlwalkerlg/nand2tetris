@@ -12,35 +12,28 @@ class VarDecCompiler extends CompilationModule
 
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('varDec');
-
-        $this->writer->writeTag('keyword', 'var');
-
         $this->tokenizer->advance();
         if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD) {
             $type = $this->types[$this->tokenizer->keyword()];
         } else {
             $type = $this->tokenizer->identifier();
         }
-        $this->engine->compileType();
+        // int|char|boolean|ClassName
 
         $this->tokenizer->advance();
-        $identifier = $this->tokenizer->identifier();
-        $this->symbolTable->define($identifier, $type, 'var');
-        $this->engine->compileIdentifier('var', true);
+
+        $varName = $this->tokenizer->identifier();
+        $this->symbolTable->define($varName, $type, 'var');
 
         while (true) {
             $this->tokenizer->advance();
-            $this->engine->compileSymbol();
 
             if ($this->tokenizer->symbol() === ';') break;
 
             $this->tokenizer->advance();
-            $identifier = $this->tokenizer->identifier();
-            $this->symbolTable->define($identifier, $type, 'var');
-            $this->engine->compileIdentifier('var', true);
-        }
 
-        $this->writer->writeClosingTag('varDec');
+            $varName = $this->tokenizer->identifier();
+            $this->symbolTable->define($varName, $type, 'var');
+        }
     }
 }

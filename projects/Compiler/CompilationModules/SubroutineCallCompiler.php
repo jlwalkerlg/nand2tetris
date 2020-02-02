@@ -4,37 +4,41 @@ require_once __DIR__ . '/CompilationModule.php';
 
 class SubroutineCallCompiler extends CompilationModule
 {
+    // method()|obj.method()
     public function compile(): void
     {
+        // obj|method
         $identifier = $this->tokenizer->identifier();
 
         $this->tokenizer->advance();
         $symbol = $this->tokenizer->symbol();
         $this->tokenizer->back();
 
-        // subroutine or class/variable
         if ($symbol !== '.') {
-            $this->engine->compileIdentifier('subroutine');
+            $subroutineName = $identifier;
         } else {
-            $isClass = $this->symbolTable->has($identifier);
-            $this->engine->compileIdentifier($isClass ? 'class' : null);
+            $this->tokenizer->advance();
+            // .
+            $this->tokenizer->advance();
+            // method
+
+            $obj = $identifier;
+            $method = $this->tokenizer->identifier();
+
+            $subroutineName = "{$obj}.{$method}";
         }
 
         $this->tokenizer->advance();
-        $this->engine->compileSymbol();
-
-        if ($symbol === '.') {
-            $this->tokenizer->advance();
-            $this->engine->compileIdentifier('subroutine');
-
-            $this->tokenizer->advance();
-            $this->engine->compileSymbol();
-        }
+        // (
 
         $this->tokenizer->advance();
-        $this->engine->compileExpressionList();
+        $nArgs = $this->engine->compileExpressionList();
+
+        $this->vmWriter->writeCall($subroutineName, $nArgs);
 
         $this->tokenizer->advance();
-        $this->engine->compileSymbol();
+        // )
+
+        $this->tokenizer->advance();
     }
 }

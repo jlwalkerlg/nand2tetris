@@ -14,25 +14,22 @@ $analyzer->run($argv[1]);
 
 class JackAnalyzer
 {
-    private $prefix = 'JW_';
-
     public function run(string $input)
     {
         $files = $this->getFiles($input);
 
-        foreach ($files as $inputFilename => $outputFilename) {
-            $outputFile = fopen($outputFilename, 'w');
-
+        foreach ($files as $inputFilename => $outputBasename) {
             $tokenizer = new JackTokenizer($inputFilename);
-            $writer = new VMWriter($outputFile);
+            $writer = new VMWriter($outputBasename . '.vm');
             $symbolTable = new SymbolTable;
-            $xmlWriter = new XmlStream($outputFile);
+            $xmlWriter = new XmlStream($outputBasename . '.xml');
             $compilationEngine = new CompilationEngine($tokenizer, $writer, $symbolTable, $xmlWriter);
 
             $compilationEngine->compileClass();
 
             $tokenizer->close();
             $writer->close();
+            $xmlWriter->close();
         }
     }
 
@@ -41,7 +38,7 @@ class JackAnalyzer
         $path = realpath($path);
 
         if (!is_dir($path)) {
-            return [$path => dirname($path) . '/' . $this->getOutputFilename($path)];
+            return [$path => dirname($path) . '/' . $this->getOutputBasename($path)];
         }
 
         $files = [];
@@ -51,15 +48,15 @@ class JackAnalyzer
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
 
             if ($ext === 'jack') {
-                $files[$path . '/' . $filename] = $path . '/' . $this->getOutputFilename($filename);
+                $files[$path . '/' . $filename] = $path . '/' . $this->getOutputBasename($filename);
             }
         }
 
         return $files;
     }
 
-    private function getOutputFilename(string $inputFilename)
+    private function getOutputBasename(string $inputFilename)
     {
-        return $this->prefix . basename($inputFilename, '.jack') . '.xml';
+        return basename($inputFilename, '.jack');
     }
 }

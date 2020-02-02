@@ -6,19 +6,17 @@ class ReturnCompiler extends CompilationModule
 {
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('returnStatement');
-
-        $this->writer->writeTag('keyword', 'return');
+        // return
 
         $this->tokenizer->advance();
+        // expression|;
+
         if ($this->tokenizer->tokenType() !== JackTokenizer::SYMBOL) {
             $this->engine->compileExpression();
-
-            $this->tokenizer->advance();
         }
 
-        $this->engine->compileSymbol();
+        $this->vmWriter->writeReturn();
 
-        $this->writer->writeClosingTag('returnStatement');
+        $this->tokenizer->advance();
     }
 }

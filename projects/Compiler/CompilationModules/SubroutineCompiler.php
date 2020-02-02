@@ -4,48 +4,44 @@ require_once __DIR__ . '/CompilationModule.php';
 
 class SubroutineCompiler extends CompilationModule
 {
-    public function compile(): void
+    private $map = [
+        JackTokenizer::CONSTRUCTOR => 'constructor',
+        JackTokenizer::FUNCTION => 'function',
+        JackTokenizer::METHOD => 'method',
+    ];
+
+    public function compile(string $class): void
     {
-        $this->writer->writeOpeningTag('subroutineDec');
+        $this->symbolTable->startSubroutine();
 
-        $map = [
-            JackTokenizer::CONSTRUCTOR => 'constructor',
-            JackTokenizer::FUNCTION => 'function',
-            JackTokenizer::METHOD => 'method',
-        ];
-
-        $this->writer->writeTag('keyword', $map[$this->tokenizer->keyword()]);
+        // constructor|method|function
+        $subroutineType = $this->map[$this->tokenizer->keyword()];
 
         $this->tokenizer->advance();
-        if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VOID) {
-            $this->writer->writeTag('keyword', 'void');
-        } else {
-            $this->engine->compileType();
-        }
+        // void|int|char|booolean|ClassName
 
         $this->tokenizer->advance();
-        $this->engine->compileIdentifier('subroutine');
+        // subroutine name
+        $subroutineName = $this->tokenizer->identifier();
 
         $this->tokenizer->advance();
-        $this->engine->compileSymbol();
+        // (
 
         $this->tokenizer->advance();
-        $this->engine->compileParameterList();
+        $nLocals = $this->engine->compileParameterList();
+
+        $this->vmWriter->writeFunction("{$class}.{$subroutineName}", $nLocals);
 
         $this->tokenizer->advance();
-        $this->engine->compileSymbol();
+        // )
 
         $this->tokenizer->advance();
         $this->compileSubroutineBody();
-
-        $this->writer->writeClosingTag('subroutineDec');
     }
 
     private function compileSubroutineBody(): void
     {
-        $this->writer->writeOpeningTag('subroutineBody');
-
-        $this->engine->compileSymbol();
+        // {
 
         while (true) {
             $this->tokenizer->advance();
@@ -60,8 +56,8 @@ class SubroutineCompiler extends CompilationModule
         $this->engine->compileStatements();
 
         $this->tokenizer->advance();
-        $this->engine->compileSymbol();
+        // }
 
-        $this->writer->writeClosingTag('subroutineBody');
+        $this->tokenizer->advance();
     }
 }

@@ -20,6 +20,4 @@ abstract class CompilationModule
         $this->writer = $writer;
         $this->engine = $engine;
     }
-
-    abstract public function compile(): void;
 }

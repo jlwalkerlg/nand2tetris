@@ -4,17 +4,22 @@ class XmlStream
 {
     private $indent = 0;
 
-    private $outputFile;
+    private $file;
 
-    public function __construct($outputFile)
+    public function __construct($filename)
     {
-        $this->outputFile = $outputFile;
+        $this->file = fopen($filename, 'w');
+    }
+
+    public function close(): void
+    {
+        fclose($this->file);
     }
 
     public function writeOpeningTag(string $tag, array $attrs = []): void
     {
         $this->writeIndents();
-        fwrite($this->outputFile, "<{$this->openingTag($tag,$attrs)}>\n");
+        fwrite($this->file, "<{$this->openingTag($tag,$attrs)}>\n");
         $this->indent += 2;
     }
 
@@ -22,19 +27,19 @@ class XmlStream
     {
         $this->indent -= 2;
         $this->writeIndents();
-        fwrite($this->outputFile, "</{$tag}>\n");
+        fwrite($this->file, "</{$tag}>\n");
     }
 
     public function writeTag(string $tag, string $contents, array $attrs = []): void
     {
         $this->writeIndents();
-        fwrite($this->outputFile, "<{$this->openingTag($tag,$attrs)}> {$contents} </{$tag}>\n");
+        fwrite($this->file, "<{$this->openingTag($tag,$attrs)}> {$contents} </{$tag}>\n");
     }
 
     public function writeIndents(): void
     {
         for ($n = 0; $n < $this->indent; $n++) {
-            fwrite($this->outputFile, ' ');
+            fwrite($this->file, ' ');
         }
     }
 

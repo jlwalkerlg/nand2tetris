@@ -22,7 +22,7 @@ class CompilationEngine
         $this->xmlWriter = $xmlWriter;
     }
 
-    private function defer(string $module, ...$args): void
+    private function defer(string $module, ...$args)
     {
         if (!array_key_exists($module, $this->modules)) {
             $compilerName = $module . 'Compiler';
@@ -30,111 +30,106 @@ class CompilationEngine
             $this->modules[$module] = new $compilerName($this->tokenizer, $this->writer, $this->symbolTable, $this->xmlWriter, $this);
         }
 
-        $this->modules[$module]->compile(...$args);
+        return $this->modules[$module]->compile(...$args);
     }
 
-    public function compileClass(...$args): void
+    public function compileClass(...$args)
     {
-        $this->defer('Class', ...$args);
+        return $this->defer('Class', ...$args);
     }
 
-    public function compileClassVarDec(...$args): void
+    public function compileClassVarDec(...$args)
     {
-        $this->defer('ClassVarDec', ...$args);
+        return $this->defer('ClassVarDec', ...$args);
     }
 
-    public function compileSubroutine(...$args): void
+    public function compileSubroutine(...$args)
     {
-        $this->defer('Subroutine', ...$args);
+        return $this->defer('Subroutine', ...$args);
     }
 
-    public function compileParameterList(...$args): void
+    public function compileParameterList(...$args)
     {
-        $this->defer('ParameterList', ...$args);
+        return $this->defer('ParameterList', ...$args);
     }
 
-    public function compileVarDec(...$args): void
+    public function compileVarDec(...$args)
     {
-        $this->defer('VarDec', ...$args);
+        return $this->defer('VarDec', ...$args);
     }
 
-    public function compileStatements(...$args): void
+    public function compileStatements(...$args)
     {
-        $this->defer('Statements', ...$args);
+        return $this->defer('Statements', ...$args);
     }
 
-    public function compileDo(...$args): void
+    public function compileDo(...$args)
     {
-        $this->defer('Do', ...$args);
+        return $this->defer('Do', ...$args);
     }
 
-    public function compileLet(...$args): void
+    public function compileLet(...$args)
     {
-        $this->defer('Let', ...$args);
+        return $this->defer('Let', ...$args);
     }
 
-    public function compileWhile(...$args): void
+    public function compileWhile(...$args)
     {
-        $this->defer('While', ...$args);
+        return $this->defer('While', ...$args);
     }
 
-    public function compileReturn(...$args): void
+    public function compileReturn(...$args)
     {
-        $this->defer('Return', ...$args);
+        return $this->defer('Return', ...$args);
     }
 
-    public function compileIf(...$args): void
+    public function compileIf(...$args)
     {
-        $this->defer('If', ...$args);
+        return $this->defer('If', ...$args);
     }
 
-    public function compileExpression(...$args): void
+    public function compileExpression(...$args)
     {
-        $this->defer('Expression', ...$args);
+        return $this->defer('Expression', ...$args);
     }
 
-    public function compileTerm(...$args): void
+    public function compileTerm(...$args)
     {
-        $this->defer('Term', ...$args);
+        return $this->defer('Term', ...$args);
     }
 
-    public function compileExpressionList(...$args): void
+    public function compileExpressionList(...$args)
     {
-        $this->defer('ExpressionList', ...$args);
+        return $this->defer('ExpressionList', ...$args);
     }
 
-    public function compileSubroutineCall(...$args): void
+    public function compileSubroutineCall(...$args)
     {
-        $this->defer('SubroutineCall', ...$args);
+        return $this->defer('SubroutineCall', ...$args);
     }
 
-    public function compileType(...$args): void
+    public function compileType(...$args)
     {
-        $this->defer('Type', ...$args);
+        return $this->defer('Type', ...$args);
     }
 
-    public function compileSymbol(...$args): void
+    public function compileSymbol(...$args)
     {
-        $this->defer('Symbol', ...$args);
+        return $this->defer('Symbol', ...$args);
     }
 
-    public function compileIdentifier(...$args): void
+    public function compileIdentifier(...$args)
     {
-        $this->defer('Identifier', ...$args);
+        return $this->defer('Identifier', ...$args);
     }
 
-    public function compileIntConst(...$args): void
+    public function compileIntConst(...$args)
     {
-        $this->defer('IntConst', ...$args);
+        return $this->defer('IntConst', ...$args);
     }
 
-    public function compileStringConst(...$args): void
+    public function compileStringConst(...$args)
     {
-        $this->defer('StringConst', ...$args);
-    }
-
-    public function compileKeywordConst(...$args): void
-    {
-        $this->defer('KeywordConst', ...$args);
+        return $this->defer('StringConst', ...$args);
     }
 }

@@ -6,34 +6,33 @@ class TermCompiler extends CompilationModule
 {
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('term');
-
         switch ($this->tokenizer->tokenType()) {
             case JackTokenizer::INT_CONST:
-                $this->engine->compileIntConst();
-                break;
+                $this->vmWriter->writePush('constant', $this->tokenizer->intVal());
+                return;
             case JackTokenizer::STRING_CONST:
                 $this->engine->compileStringConst();
-                break;
+                return;
             case JackTokenizer::KEYWORD:
-                $this->engine->compileKeywordConst();
-                break;
+                $this->compileKeywordConst();
+                return;
             case JackTokenizer::SYMBOL:
                 if ($this->tokenizer->symbol() === '(') {
-                    $this->engine->compileSymbol();
-
                     $this->tokenizer->advance();
                     $this->engine->compileExpression();
 
                     $this->tokenizer->advance();
-                    $this->engine->compileSymbol();
-                } else if ($this->tokenizer->symbol() === '-' || $this->tokenizer->symbol() === '~') {
-                    $this->engine->compileSymbol();
-
+                    // )
+                } else if ($this->tokenizer->symbol() === '-') {
                     $this->tokenizer->advance();
                     $this->engine->compileTerm();
+                    $this->vmWriter->writeArithmetic('neg');
+                } else if ($this->tokenizer->symbol() === '~') {
+                    $this->tokenizer->advance();
+                    $this->engine->compileTerm();
+                    $this->vmWriter->writeArithmetic('not');
                 }
-                break;
+                return;
             case JackTokenizer::IDENTIFIER:
                 $this->tokenizer->advance();
                 if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL && $this->tokenizer->symbol() === '[') {
@@ -43,13 +42,13 @@ class TermCompiler extends CompilationModule
                     $this->engine->compileIdentifier();
 
                     $this->tokenizer->advance();
-                    $this->engine->compileSymbol();
+                    // [
 
                     $this->tokenizer->advance();
                     $this->engine->compileExpression();
 
                     $this->tokenizer->advance();
-                    $this->engine->compileSymbol();
+                    // ]
                 } else if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL && $this->tokenizer->symbol() === '.') {
                     // subroutine call
                     $this->tokenizer->back();
@@ -59,9 +58,23 @@ class TermCompiler extends CompilationModule
                     $this->tokenizer->back();
                     $this->engine->compileIdentifier();
                 }
-                break;
+                return;
         }
+    }
 
-        $this->writer->writeClosingTag('term');
+    private function compileKeywordConst()
+    {
+        switch ($this->tokenizer->keyword()) {
+            case JackTokenizer::TRUE:
+                $this->vmWriter->writePush('constant', 1);
+                $this->vmWriter->writeArithmetic('neg');
+                return;
+            case JackTokenizer::FALSE:
+                return $this->vmWriter->writePush('constant', 0);
+            case JackTokenizer::NULL:
+                return $this->vmWriter->writePush('constant', 0);
+            case JackTokenizer::THIS:
+                return $this->vmWriter->writePush('pointer', 0);
+        }
     }
 }

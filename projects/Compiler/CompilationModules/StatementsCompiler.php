@@ -6,39 +6,34 @@ class StatementsCompiler extends CompilationModule
 {
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('statements');
-
         while (true) {
             if ($this->tokenizer->tokenType() !== JackTokenizer::KEYWORD) {
                 $this->tokenizer->back();
-                break;
+                return;
             }
 
             $this->compileStatement();
-            $this->tokenizer->advance();
         }
-
-        $this->writer->writeClosingTag('statements');
     }
 
-    public function compileStatement(): void
+    private function compileStatement(): void
     {
         switch ($this->tokenizer->keyword()) {
             case JackTokenizer::LET:
                 $this->engine->compileLet();
-                break;
+                return;
             case JackTokenizer::IF:
                 $this->engine->compileIf();
-                break;
+                return;
             case JackTokenizer::WHILE:
                 $this->engine->compileWhile();
-                break;
+                return;
             case JackTokenizer::DO:
                 $this->engine->compileDo();
-                break;
+                return;
             case JackTokenizer::RETURN:
                 $this->engine->compileReturn();
-                break;
+                return;
         }
     }
 }
