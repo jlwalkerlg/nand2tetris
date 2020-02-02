@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/CompilationModule.php';
 
+// ((type varName) (, type varName)*)?
+
 class ParameterListCompiler extends CompilationModule
 {
     private $types = [
@@ -12,19 +14,18 @@ class ParameterListCompiler extends CompilationModule
 
     public function compile(): int
     {
+        // )|type
+
         $nParams = 0;
 
         while (true) {
             if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
                 if ($this->tokenizer->symbol() === ')') {
-                    $this->tokenizer->back();
                     return $nParams;
                 }
-
-                if ($this->tokenizer->symbol() === ',') {
-                    $this->tokenizer->advance();
-                }
             }
+
+            // type
 
             if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD) {
                 $type = $this->types[$this->tokenizer->keyword()];
@@ -32,13 +33,19 @@ class ParameterListCompiler extends CompilationModule
                 $type = $this->tokenizer->identifier();
             }
 
-            $this->tokenizer->advance();
+            $this->tokenizer->advance(); // varName
             $varName = $this->tokenizer->identifier();
 
-            $nParams++;
-            $this->symbolTable->define($varName, $type, 'argument');
+            $this->tokenizer->advance(); // ,|)
 
-            $this->tokenizer->advance();
+            if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL) {
+                if ($this->tokenizer->symbol() === ',') {
+                    $this->tokenizer->advance(); // type
+                }
+            }
+
+            $this->symbolTable->define($varName, $type, 'argument');
+            $nParams++;
         }
     }
 }

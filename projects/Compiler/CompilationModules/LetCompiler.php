@@ -2,38 +2,34 @@
 
 require_once __DIR__ . '/CompilationModule.php';
 
+// let varName([expression])? = expression;
+
 class LetCompiler extends CompilationModule
 {
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('letStatement');
+        // let
 
-        $this->writer->writeTag('keyword', 'let');
+        $this->tokenizer->advance(); // varName
 
-        $this->tokenizer->advance();
-        $this->engine->compileIdentifier();
+        $varName = $this->tokenizer->identifier();
+        $segment = $this->symbolTable->kindOf($varName);
+        $index = $this->symbolTable->indexOf($varName);
 
-        $this->tokenizer->advance();
-        if ($this->tokenizer->symbol() !== '=') {
-            $this->engine->compileSymbol();
+        $this->tokenizer->advance(); // [|=
 
-            $this->tokenizer->advance();
-            $this->engine->compileExpression();
-
-            $this->tokenizer->advance();
-            $this->engine->compileSymbol();
+        if ($this->tokenizer->symbol() === '[') {
+            $this->tokenizer->advance(); // expression
+            $this->engine->compileExpression(); // ]
 
             $this->tokenizer->advance();
         }
 
-        $this->engine->compileSymbol();
+        $this->tokenizer->advance(); // expression
+        $this->engine->compileExpression(); // ;
 
         $this->tokenizer->advance();
-        $this->engine->compileExpression();
 
-        $this->tokenizer->advance();
-        $this->engine->compileSymbol();
-
-        $this->writer->writeClosingTag('letStatement');
+        $this->vmWriter->writePop($this->getSegment($segment), $index);
     }
 }

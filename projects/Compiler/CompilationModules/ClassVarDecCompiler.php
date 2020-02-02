@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/CompilationModule.php';
 
+// static|field type varName (, varName)*;
+
 class ClassVarDecCompiler extends CompilationModule
 {
     private $types = [
@@ -12,8 +14,7 @@ class ClassVarDecCompiler extends CompilationModule
 
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('classVarDec');
-
+        // field|static
         switch ($this->tokenizer->keyword()) {
             case JackTokenizer::FIELD:
                 $kind = $category = 'field';
@@ -23,33 +24,31 @@ class ClassVarDecCompiler extends CompilationModule
                 break;
         }
 
-        $this->writer->writeTag('keyword', $kind);
+        $this->tokenizer->advance(); // type
 
-        $this->tokenizer->advance();
         if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD) {
             $type = $this->types[$this->tokenizer->keyword()];
         } else {
             $type = $this->tokenizer->identifier();
         }
-        $this->engine->compileType();
 
-        $this->tokenizer->advance();
-        $identifier = $this->tokenizer->identifier();
-        $this->symbolTable->define($identifier, $type, $kind);
-        $this->engine->compileIdentifier($category, true);
+        $this->tokenizer->advance(); // varName
+
+        $varName = $this->tokenizer->identifier();
+        $this->symbolTable->define($varName, $type, $kind);
 
         while (true) {
-            $this->tokenizer->advance();
-            $this->engine->compileSymbol();
+            $this->tokenizer->advance(); // ,|;
 
-            if ($this->tokenizer->symbol() === ';') break;
+            if ($this->tokenizer->symbol() === ';') {
+                $this->tokenizer->advance();
+                return;
+            }
 
-            $this->tokenizer->advance();
-            $identifier = $this->tokenizer->identifier($category, true);
-            $this->symbolTable->define($identifier, $type, $kind);
-            $this->engine->compileIdentifier();
+            $this->tokenizer->advance(); // varName
+
+            $varName = $this->tokenizer->identifier();
+            $this->symbolTable->define($varName, $type, $kind);
         }
-
-        $this->writer->writeClosingTag('classVarDec');
     }
 }

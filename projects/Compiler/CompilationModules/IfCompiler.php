@@ -2,48 +2,37 @@
 
 require_once __DIR__ . '/CompilationModule.php';
 
+// if (expression) {statements} (else {statements})?
+
 class IfCompiler extends CompilationModule
 {
     public function compile(): void
     {
-        $this->writer->writeOpeningTag('ifStatement');
+        // if
 
-        $this->writer->writeTag('keyword', 'if');
+        $l1 = $this->generateLabel();
+        $l2 = $this->generateLabel();
 
-        $this->tokenizer->advance();
-        $this->engine->compileSymbol();
-
-        $this->tokenizer->advance();
+        $this->tokenizer->advance(); // (
+        $this->tokenizer->advance(); // expression
         $this->engine->compileExpression();
+        $this->vmWriter->writeArithmetic('not');
+        $this->vmWriter->writeIf($l1);
+        $this->tokenizer->advance(); // )
+        $this->tokenizer->advance(); // {
+        $this->engine->compileStatements(); // }
+        $this->vmWriter->writeGoto($l2);
 
-        $this->tokenizer->advance();
-        $this->engine->compileSymbol();
+        $this->vmWriter->writeLabel($l1);
 
-        $this->tokenizer->advance();
-        $this->engine->compileSymbol();
-
-        $this->tokenizer->advance();
-        $this->engine->compileStatements();
-
-        $this->tokenizer->advance();
-        $this->engine->compileSymbol();
-
-        $this->tokenizer->advance();
+        $this->tokenizer->advance(); // else?
         if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::ELSE) {
-            $this->writer->writeTag('keyword', 'else');
-
+            $this->tokenizer->advance(); // {
+            $this->tokenizer->advance(); // statements
+            $this->engine->compileStatements(); // }
             $this->tokenizer->advance();
-            $this->engine->compileSymbol();
-
-            $this->tokenizer->advance();
-            $this->engine->compileStatements();
-
-            $this->tokenizer->advance();
-            $this->engine->compileSymbol();
-        } else {
-            $this->tokenizer->back();
         }
 
-        $this->writer->writeClosingTag('ifStatement');
+        $this->vmWriter->writeLabel($l2);
     }
 }

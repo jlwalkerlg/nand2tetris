@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/CompilationModule.php';
 
+// constructor|function|method void|type subroutineName (parameterList) subroutineBody
+
 class SubroutineCompiler extends CompilationModule
 {
     private $map = [
@@ -12,51 +14,40 @@ class SubroutineCompiler extends CompilationModule
 
     public function compile(string $class): void
     {
+        // constructor|function|method
+
         $this->symbolTable->startSubroutine();
 
-        // constructor|method|function
         $subroutineType = $this->map[$this->tokenizer->keyword()];
 
-        $this->tokenizer->advance();
-        // void|int|char|booolean|ClassName
+        $this->tokenizer->advance(); // void|int|char|boolean|ClassName
 
-        $this->tokenizer->advance();
-        // subroutine name
+        $this->tokenizer->advance(); // subroutineName
         $subroutineName = $this->tokenizer->identifier();
 
-        $this->tokenizer->advance();
-        // (
+        $this->tokenizer->advance(); // (
 
-        $this->tokenizer->advance();
-        $nLocals = $this->engine->compileParameterList();
+        $this->tokenizer->advance(); // parameterList
+        $nLocals = $this->engine->compileParameterList(); // )
 
         $this->vmWriter->writeFunction("{$class}.{$subroutineName}", $nLocals);
 
-        $this->tokenizer->advance();
-        // )
-
-        $this->tokenizer->advance();
+        $this->tokenizer->advance(); // subroutineBody
         $this->compileSubroutineBody();
     }
 
+    // { varDec* statements }
     private function compileSubroutineBody(): void
     {
         // {
 
-        while (true) {
-            $this->tokenizer->advance();
+        $this->tokenizer->advance(); // varDec|statements
 
-            if ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VAR) {
-                $this->engine->compileVarDec();
-            } else {
-                break;
-            }
+        while ($this->tokenizer->tokenType() === JackTokenizer::KEYWORD && $this->tokenizer->keyword() === JackTokenizer::VAR) {
+            $this->engine->compileVarDec(); // varDec|statements
         }
 
-        $this->engine->compileStatements();
-
-        $this->tokenizer->advance();
-        // }
+        $this->engine->compileStatements(); // }
 
         $this->tokenizer->advance();
     }

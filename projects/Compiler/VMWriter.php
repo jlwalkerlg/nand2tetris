@@ -26,7 +26,7 @@ class VMWriter
 
     public function writeLabel(string $label): void
     {
-        fwrite($this->file, "({$label})" . PHP_EOL);
+        fwrite($this->file, "label {$label}" . PHP_EOL);
     }
 
     public function writeGoto(string $label): void

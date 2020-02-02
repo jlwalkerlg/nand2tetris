@@ -2,13 +2,15 @@
 
 require_once __DIR__ . '/CompilationModule.php';
 
+// term (op term)*
+
 class ExpressionCompiler extends CompilationModule
 {
     private $ops = [
         '+' => 'add',
-        '-' => 'neg',
-        '*' => 'Math.multiply()',
-        '/' => 'Math.divide()',
+        '-' => 'sub',
+        '*' => null,
+        '/' => null,
         '&' => 'and',
         '|' => 'or',
         '<' => 'lt',
@@ -19,17 +21,18 @@ class ExpressionCompiler extends CompilationModule
     public function compile(): void
     {
         $this->engine->compileTerm();
+        // op?
 
-        $this->tokenizer->advance();
-        if ($this->tokenizer->tokenType() === JackTokenizer::SYMBOL && array_key_exists($this->tokenizer->symbol(), $this->ops)) {
+        while (true) {
+            if ($this->tokenizer->tokenType() !== JackTokenizer::SYMBOL) return;
+            if (!array_key_exists($this->tokenizer->symbol(), $this->ops)) return;
+
+            // op term
             $operator = $this->tokenizer->symbol();
-
-            $this->tokenizer->advance();
+            $this->tokenizer->advance(); // term
             $this->engine->compileTerm();
 
             $this->compileOperator($operator);
-        } else {
-            $this->tokenizer->back();
         }
     }
 
@@ -43,6 +46,6 @@ class ExpressionCompiler extends CompilationModule
             return $this->vmWriter->writeCall('Math.divide', 2);
         }
 
-        return $this->vmWriter->writeArithmetic($this->ops[$operator]);
+        $this->vmWriter->writeArithmetic($this->ops[$operator]);
     }
 }
