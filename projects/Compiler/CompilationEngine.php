@@ -3,7 +3,6 @@
 require_once __DIR__ . '/JackTokenizer.php';
 require_once __DIR__ . '/VMWriter.php';
 require_once __DIR__ . '/SymbolTable.php';
-require_once __DIR__ . '/XmlStream.php';
 
 class CompilationEngine
 {
