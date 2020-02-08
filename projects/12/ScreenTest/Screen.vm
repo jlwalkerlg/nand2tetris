@@ -209,6 +209,12 @@ push constant 10
 push constant 10
 call Screen.drawLine 4
 pop temp 0
+push constant 50
+push constant 100
+push constant 100
+push constant 200
+call Screen.drawRectangle 4
+pop temp 0
 call Sys.halt 0
 pop temp 0
 push constant 0
@@ -530,6 +536,25 @@ label WHILE_END2
 push constant 0
 return
 function Screen.drawRectangle 0
+label WHILE_EXP0
+push argument 1
+push argument 3
+gt
+not
+not
+if-goto WHILE_END0
+push argument 0
+push argument 1
+push argument 2
+push argument 1
+call Screen.drawLine 4
+pop temp 0
+push argument 1
+push constant 1
+add
+pop argument 1
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 return
 function Screen.drawCircle 0

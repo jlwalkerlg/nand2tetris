@@ -61,6 +61,8 @@ class Screen {
         // diagonal lines
         do Screen.drawLine(0, 0, 10, 10);
 
+        do Screen.drawRectangle(50, 100, 100, 200);
+
         do Sys.halt();
 
         return;
@@ -202,6 +204,11 @@ class Screen {
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        while (~(y1 > y2)) {
+            do Screen.drawLine(x1, y1, x2, y1);
+            let y1 = y1 + 1;
+        }
+
         return;
     }
 
