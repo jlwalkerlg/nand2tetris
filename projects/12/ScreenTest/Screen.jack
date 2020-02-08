@@ -48,6 +48,9 @@ class Screen {
         do Screen.drawPixel(511, 0);
         do Screen.drawPixel(511, 255);
 
+        do Screen.drawLine(0, 0, 10, 0);
+        do Screen.drawLine(0, 100, 100, 100);
+        do Screen.drawLine(0, 200, 511, 200);
         do Screen.drawLine(0, 0, 10, 10);
 
         do Sys.halt();
@@ -95,9 +98,61 @@ class Screen {
         return;
     }
 
+    function int getAddress(int x, int y) {
+        return SCREEN + (32 * y) + (x / 16);
+    }
+
+    function int getPixel(int x) {
+        var int mod;
+        let mod = x - (x / 16 * 16);
+        return twoToThe[mod] & COLOR;
+    }
+
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int dx, dy, a, b, adyMinusbdx;
+        var int x1Address, x2Address, mod, pixel;
+
+        if (y1 = y2) {
+            // draw from x1 to end
+            // draw from 0 to x2
+            // while x1Address < x2Address, poke -1
+            let x1Address = Screen.getAddress(x1, y1);
+            let x2Address = Screen.getAddress(x2, y1);
+
+            // 1. draw line from x1 to x1Address + 1
+
+            let mod = x1 - (x1 / 16 * 16);
+            let pixel = twoToThe[x1] - 1;
+            let pixel = -1 - pixel;
+
+            do Memory.poke(x1Address, pixel & COLOR);
+
+            if (x1Address = x2Address) {
+                return;
+            }
+
+            // 2. draw line from x2Address to x2
+
+            let mod = x2 - (x2 / 16 * 16);
+            if (mod = 15) {
+                let pixel = -1;
+            } else {
+                let pixel = twoToThe[x2 + 1] - 1;
+            }
+
+            do Memory.poke(x2Address, pixel & COLOR);
+
+            // 3. Fill in words between x1Address and x2Address
+            let x1Address = x1Address + 1;
+
+            while (x1Address < x2Address) {
+                do Memory.poke(x1Address, -1 & COLOR);
+                let x1Address = x1Address + 1;
+            }
+
+            return;
+        }
 
         let dx = x2 - x1;
         let dy = y2 - y1;

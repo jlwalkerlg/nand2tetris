@@ -170,6 +170,24 @@ pop temp 0
 push constant 0
 push constant 0
 push constant 10
+push constant 0
+call Screen.drawLine 4
+pop temp 0
+push constant 0
+push constant 100
+push constant 100
+push constant 100
+call Screen.drawLine 4
+pop temp 0
+push constant 0
+push constant 200
+push constant 511
+push constant 200
+call Screen.drawLine 4
+pop temp 0
+push constant 0
+push constant 0
+push constant 10
 push constant 10
 call Screen.drawLine 4
 pop temp 0
@@ -251,7 +269,147 @@ call Memory.poke 2
 pop temp 0
 push constant 0
 return
-function Screen.drawLine 5
+function Screen.getAddress 0
+push static 0
+push constant 32
+push argument 1
+call Math.multiply 2
+add
+push argument 0
+push constant 16
+call Math.divide 2
+add
+return
+function Screen.getPixel 1
+push argument 0
+push argument 0
+push constant 16
+call Math.divide 2
+push constant 16
+call Math.multiply 2
+sub
+pop local 0
+push local 0
+push static 5
+add
+pop pointer 1
+push that 0
+push static 4
+and
+return
+function Screen.drawLine 9
+push argument 1
+push argument 3
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+push argument 1
+call Screen.getAddress 2
+pop local 5
+push argument 2
+push argument 1
+call Screen.getAddress 2
+pop local 6
+push argument 0
+push argument 0
+push constant 16
+call Math.divide 2
+push constant 16
+call Math.multiply 2
+sub
+pop local 7
+push argument 0
+push static 5
+add
+pop pointer 1
+push that 0
+push constant 1
+sub
+pop local 8
+push constant 1
+neg
+push local 8
+sub
+pop local 8
+push local 5
+push local 8
+push static 4
+and
+call Memory.poke 2
+pop temp 0
+push local 5
+push local 6
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+return
+label IF_FALSE1
+push argument 2
+push argument 2
+push constant 16
+call Math.divide 2
+push constant 16
+call Math.multiply 2
+sub
+pop local 7
+push local 7
+push constant 15
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 1
+neg
+pop local 8
+goto IF_END2
+label IF_FALSE2
+push argument 2
+push constant 1
+add
+push static 5
+add
+pop pointer 1
+push that 0
+push constant 1
+sub
+pop local 8
+label IF_END2
+push local 6
+push local 8
+push static 4
+and
+call Memory.poke 2
+pop temp 0
+push local 5
+push constant 1
+add
+pop local 5
+label WHILE_EXP0
+push local 5
+push local 6
+lt
+not
+if-goto WHILE_END0
+push local 5
+push constant 1
+neg
+push static 4
+and
+call Memory.poke 2
+pop temp 0
+push local 5
+push constant 1
+add
+pop local 5
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+label IF_FALSE0
 push argument 2
 push argument 0
 sub
@@ -260,7 +418,7 @@ push argument 3
 push argument 1
 sub
 pop local 1
-label WHILE_EXP0
+label WHILE_EXP1
 push local 2
 push local 0
 gt
@@ -271,7 +429,7 @@ gt
 not
 and
 not
-if-goto WHILE_END0
+if-goto WHILE_END1
 push argument 0
 push local 2
 add
@@ -283,9 +441,9 @@ pop temp 0
 push local 4
 push constant 0
 lt
-if-goto IF_TRUE0
-goto IF_FALSE0
-label IF_TRUE0
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
 push local 2
 push constant 1
 add
@@ -294,8 +452,8 @@ push local 4
 push local 1
 add
 pop local 4
-goto IF_END0
-label IF_FALSE0
+goto IF_END3
+label IF_FALSE3
 push local 3
 push constant 1
 add
@@ -304,9 +462,9 @@ push local 4
 push local 0
 sub
 pop local 4
-label IF_END0
-goto WHILE_EXP0
-label WHILE_END0
+label IF_END3
+goto WHILE_EXP1
+label WHILE_END1
 push constant 0
 return
 function Screen.drawRectangle 0
