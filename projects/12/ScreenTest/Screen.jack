@@ -48,9 +48,17 @@ class Screen {
         do Screen.drawPixel(511, 0);
         do Screen.drawPixel(511, 255);
 
+        // horizontal lines
         do Screen.drawLine(0, 0, 10, 0);
         do Screen.drawLine(0, 100, 100, 100);
         do Screen.drawLine(0, 200, 511, 200);
+
+        // vertical lines
+        do Screen.drawLine(100, 0, 100, 100);
+        do Screen.drawLine(150, 100, 150, 200);
+        do Screen.drawLine(200, 0, 200, 255);
+
+        // diagonal lines
         do Screen.drawLine(0, 0, 10, 10);
 
         do Sys.halt();
@@ -111,7 +119,26 @@ class Screen {
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int dx, dy, a, b, adyMinusbdx;
-        var int x1Address, x2Address, mod, pixel;
+        var int x1Address, x2Address, y1Address, y2Address, mod, pixel;
+
+        if (x1 = x2) {
+            let y1Address = Screen.getAddress(x1, y1);
+            let y2Address = Screen.getAddress(x1, y2);
+
+            let pixel = Screen.getPixel(x1);
+
+            do Memory.poke(y1Address, pixel);
+
+            let y1Address = y1Address + 32;
+
+            while (y1Address < y2Address) {
+                do Memory.poke(y1Address, pixel);
+
+                let y1Address = y1Address + 32;
+            }
+
+            return;
+        }
 
         if (y1 = y2) {
             // draw from x1 to end
