@@ -7,28 +7,48 @@
  * This library provides two services: direct access to the computer's main
  * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
  * consists of 32,768 words, each holding a 16-bit binary number.
- */ 
+ */
 class Memory {
+
+    // When the jack compiler compiles memory[x],
+    // it adds memory to x, pops it into pointer 1,
+    // then uses that value to access the RAM location
+    // at which pointer 1 points.
+    // Hence if memory = 0, any location x in RAM can be
+    // accessed with memory[x];
+    static Array memory;
 
     /** Initializes the class. */
     function void init() {
+        let memory = 0;
+
+        do Memory.poke(8000, -1);
+
+        do Sys.halt();
+
+        return;
     }
 
     /** Returns the RAM value at the given address. */
     function int peek(int address) {
+        return memory[address];
     }
 
     /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
+        return 1;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
-    }    
+        return;
+    }
 }
