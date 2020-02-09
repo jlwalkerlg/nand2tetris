@@ -18,24 +18,23 @@ class Memory {
     // accessed with memory[x];
     static Array memory;
 
-    static int HEAP_BASE;
+    static Array freeList;
 
-    // pointer to next available address
-    static int free;
+    static int HEAP_BASE, HEAP_SIZE, length, next;
 
     /** Initializes the class. */
     function void init() {
-        var Array arr;
-
         let memory = 0;
+
         let HEAP_BASE = 2048;
-        let free = HEAP_BASE;
+        let HEAP_SIZE = 14335;
 
-        let arr = Array.new(2);
-        let arr[0] = 1;
-        let arr[1] = 2;
+        let length = 0;
+        let next = 1;
 
-        do Sys.halt();
+        let freeList = HEAP_BASE;
+        let freeList[length] = HEAP_SIZE;
+        let freeList[next] = null;
 
         return;
     }
@@ -54,17 +53,41 @@ class Memory {
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
-        var int pointer;
+        var Array block, prevBlock, nextBlock;
 
-        let pointer = free;
-        let free = free + size;
+        let block = freeList;
+        let prevBlock = 0;
 
-        return pointer;
+        while (block[length] < size) {
+            if (block[next] = null) {
+                return -1;
+            }
+            let prevBlock = block;
+            let block = block[next];
+        }
+
+        let nextBlock = block + size + 2;
+        let nextBlock[length] = block[length] - size - 2;
+        let nextBlock[next] = block[next];
+
+        let block[length] = size;
+        let block[next] = null;
+
+        if (block = freeList) {
+            let freeList = nextBlock;
+        } else {
+            let prevBlock[next] = nextBlock;
+        }
+
+        return block + 2;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
+        // set restored block to be start of freeList
+        let memory[o - 1] = memory[freeList + 1];
+        let freeList = o - 2;
         return;
     }
 }
