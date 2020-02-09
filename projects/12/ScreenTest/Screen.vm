@@ -145,101 +145,6 @@ pop temp 0
 pop pointer 1
 push temp 0
 pop that 0
-call Screen.clearScreen 0
-pop temp 0
-push constant 0
-push constant 0
-call Screen.drawPixel 2
-pop temp 0
-push constant 0
-push constant 1
-call Screen.drawPixel 2
-pop temp 0
-push constant 16
-push constant 0
-call Screen.drawPixel 2
-pop temp 0
-push constant 511
-push constant 0
-call Screen.drawPixel 2
-pop temp 0
-push constant 511
-push constant 255
-call Screen.drawPixel 2
-pop temp 0
-push constant 0
-push constant 0
-push constant 10
-push constant 0
-call Screen.drawLine 4
-pop temp 0
-push constant 0
-push constant 100
-push constant 100
-push constant 100
-call Screen.drawLine 4
-pop temp 0
-push constant 0
-push constant 200
-push constant 511
-push constant 200
-call Screen.drawLine 4
-pop temp 0
-push constant 100
-push constant 0
-push constant 100
-push constant 100
-call Screen.drawLine 4
-pop temp 0
-push constant 150
-push constant 100
-push constant 150
-push constant 200
-call Screen.drawLine 4
-pop temp 0
-push constant 200
-push constant 0
-push constant 200
-push constant 255
-call Screen.drawLine 4
-pop temp 0
-push constant 300
-push constant 100
-push constant 310
-push constant 110
-call Screen.drawLine 4
-pop temp 0
-push constant 300
-push constant 100
-push constant 310
-push constant 90
-call Screen.drawLine 4
-pop temp 0
-push constant 300
-push constant 100
-push constant 290
-push constant 90
-call Screen.drawLine 4
-pop temp 0
-push constant 300
-push constant 100
-push constant 290
-push constant 110
-call Screen.drawLine 4
-pop temp 0
-push constant 50
-push constant 100
-push constant 100
-push constant 200
-call Screen.drawRectangle 4
-pop temp 0
-push constant 200
-push constant 100
-push constant 50
-call Screen.drawCircle 3
-pop temp 0
-call Sys.halt 0
-pop temp 0
 push constant 0
 return
 function Screen.clearScreen 1
@@ -344,13 +249,26 @@ add
 pop pointer 1
 push that 0
 return
-function Screen.drawLine 15
+function Screen.drawLine 16
 push argument 0
 push argument 2
 eq
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+push argument 1
+push argument 3
+gt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push argument 1
+pop local 15
+push argument 3
+pop argument 1
+push local 15
+pop argument 3
+label IF_FALSE1
 push argument 0
 push argument 1
 call Screen.getAddress 2
@@ -392,9 +310,22 @@ label IF_FALSE0
 push argument 1
 push argument 3
 eq
-if-goto IF_TRUE1
-goto IF_FALSE1
-label IF_TRUE1
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push argument 0
+push argument 2
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push argument 0
+pop local 15
+push argument 2
+pop argument 0
+push local 15
+pop argument 2
+label IF_FALSE3
 push argument 0
 push argument 1
 call Screen.getAddress 2
@@ -435,14 +366,14 @@ pop local 11
 push local 11
 push constant 15
 eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
 push constant 1
 neg
 pop local 14
-goto IF_END2
-label IF_FALSE2
+goto IF_END4
+label IF_FALSE4
 push local 11
 push constant 1
 add
@@ -453,13 +384,13 @@ push that 0
 push constant 1
 sub
 pop local 14
-label IF_END2
+label IF_END4
 push local 7
 push local 8
 eq
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
 push local 13
 push local 14
 and
@@ -468,7 +399,7 @@ call Screen.merge 2
 pop temp 0
 push constant 0
 return
-label IF_FALSE3
+label IF_FALSE5
 push local 13
 push local 7
 call Screen.merge 2
@@ -500,7 +431,7 @@ goto WHILE_EXP1
 label WHILE_END1
 push constant 0
 return
-label IF_FALSE1
+label IF_FALSE2
 push argument 2
 push argument 0
 sub
@@ -518,23 +449,23 @@ pop local 6
 push argument 2
 push argument 0
 lt
-if-goto IF_TRUE4
-goto IF_FALSE4
-label IF_TRUE4
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
 push constant 1
 neg
 pop local 5
-label IF_FALSE4
+label IF_FALSE6
 push argument 3
 push argument 1
 lt
-if-goto IF_TRUE5
-goto IF_FALSE5
-label IF_TRUE5
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
 push constant 1
 neg
 pop local 6
-label IF_FALSE5
+label IF_FALSE7
 label WHILE_EXP2
 push local 2
 call Math.abs 1
@@ -560,9 +491,9 @@ pop temp 0
 push local 4
 push constant 0
 lt
-if-goto IF_TRUE6
-goto IF_FALSE6
-label IF_TRUE6
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
 push local 2
 push local 5
 add
@@ -571,8 +502,8 @@ push local 4
 push local 1
 add
 pop local 4
-goto IF_END6
-label IF_FALSE6
+goto IF_END8
+label IF_FALSE8
 push local 3
 push local 6
 add
@@ -581,7 +512,7 @@ push local 4
 push local 0
 sub
 pop local 4
-label IF_END6
+label IF_END8
 goto WHILE_EXP2
 label WHILE_END2
 push constant 0
