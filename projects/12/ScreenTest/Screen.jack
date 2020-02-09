@@ -64,7 +64,11 @@ class Screen {
         do Screen.drawLine(300, 100, 290, 90);
         do Screen.drawLine(300, 100, 290, 110);
 
+        // rectange
         do Screen.drawRectangle(50, 100, 100, 200);
+
+        // circle
+        do Screen.drawCircle(200, 100, 50);
 
         do Sys.halt();
 
@@ -134,7 +138,7 @@ class Screen {
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int dx, dy, a, b, adyMinusbdx, xSign, ySign;
-        var int x1Address, x2Address, y1Address, y2Address, mod, pixel;
+        var int x1Address, x2Address, y1Address, y2Address, mod, pixel, pixel1, pixel2;
 
         if (x1 = x2) {
             let y1Address = Screen.getAddress(x1, y1);
@@ -159,34 +163,34 @@ class Screen {
             let x1Address = Screen.getAddress(x1, y1);
             let x2Address = Screen.getAddress(x2, y1);
 
-            // 1. draw line from x1 to x1Address + 1
+            // 1. get line from x1 to x1Address + 1
 
             let mod = x1 - (x1 / 16 * 16);
-            let pixel = twoToThe[x1] - 1;
-            let pixel = -1 - pixel;
+            let pixel1 = twoToThe[mod] - 1;
+            let pixel1 = -1 - pixel1;
 
-            do Screen.merge(pixel, x1Address);
-
-            if (x1Address = x2Address) {
-                return;
-            }
-
-            // 2. draw line from x2Address to x2
+            // 2. get line from x2Address to x2
 
             let mod = x2 - (x2 / 16 * 16);
             if (mod = 15) {
-                let pixel = -1;
+                let pixel2 = -1;
             } else {
-                let pixel = twoToThe[x2 + 1] - 1;
+                let pixel2 = twoToThe[mod + 1] - 1;
             }
 
-            do Screen.merge(pixel, x2Address);
+            if (x1Address = x2Address) {
+                do Screen.merge(pixel1 & pixel2, x1Address);
+                return;
+            }
+
+            do Screen.merge(pixel1, x1Address);
+            do Screen.merge(pixel2, x2Address);
 
             // 3. Fill in words between x1Address and x2Address
             let x1Address = x1Address + 1;
 
             while (x1Address < x2Address) {
-                do Screen.merge(pixel, x1Address);
+                do Screen.merge(-1, x1Address);
                 let x1Address = x1Address + 1;
             }
 
@@ -233,6 +237,16 @@ class Screen {
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
+        var int dy, sqrt;
+
+        let dy = -r;
+
+        while (~(dy > r)) {
+            let sqrt = Math.sqrt((r * r) - (dy * dy));
+            do Screen.drawLine(x - sqrt, y + dy, x + sqrt, y + dy);
+            let dy = dy + 1;
+        }
+
         return;
     }
 }

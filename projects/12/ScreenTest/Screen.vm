@@ -233,6 +233,11 @@ push constant 100
 push constant 200
 call Screen.drawRectangle 4
 pop temp 0
+push constant 200
+push constant 100
+push constant 50
+call Screen.drawCircle 3
+pop temp 0
 call Sys.halt 0
 pop temp 0
 push constant 0
@@ -339,7 +344,7 @@ add
 pop pointer 1
 push that 0
 return
-function Screen.drawLine 13
+function Screen.drawLine 15
 push argument 0
 push argument 2
 eq
@@ -406,32 +411,19 @@ push constant 16
 call Math.multiply 2
 sub
 pop local 11
-push argument 0
+push local 11
 push static 5
 add
 pop pointer 1
 push that 0
 push constant 1
 sub
-pop local 12
+pop local 13
 push constant 1
 neg
-push local 12
+push local 13
 sub
-pop local 12
-push local 12
-push local 7
-call Screen.merge 2
-pop temp 0
-push local 7
-push local 8
-eq
-if-goto IF_TRUE2
-goto IF_FALSE2
-label IF_TRUE2
-push constant 0
-return
-label IF_FALSE2
+pop local 13
 push argument 2
 push argument 2
 push constant 16
@@ -443,15 +435,15 @@ pop local 11
 push local 11
 push constant 15
 eq
-if-goto IF_TRUE3
-goto IF_FALSE3
-label IF_TRUE3
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
 push constant 1
 neg
-pop local 12
-goto IF_END3
-label IF_FALSE3
-push argument 2
+pop local 14
+goto IF_END2
+label IF_FALSE2
+push local 11
 push constant 1
 add
 push static 5
@@ -460,9 +452,28 @@ pop pointer 1
 push that 0
 push constant 1
 sub
-pop local 12
-label IF_END3
-push local 12
+pop local 14
+label IF_END2
+push local 7
+push local 8
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push local 13
+push local 14
+and
+push local 7
+call Screen.merge 2
+pop temp 0
+push constant 0
+return
+label IF_FALSE3
+push local 13
+push local 7
+call Screen.merge 2
+pop temp 0
+push local 14
 push local 8
 call Screen.merge 2
 pop temp 0
@@ -476,7 +487,8 @@ push local 8
 lt
 not
 if-goto WHILE_END1
-push local 12
+push constant 1
+neg
 push local 7
 call Screen.merge 2
 pop temp 0
@@ -596,6 +608,45 @@ goto WHILE_EXP0
 label WHILE_END0
 push constant 0
 return
-function Screen.drawCircle 0
+function Screen.drawCircle 2
+push argument 2
+neg
+pop local 0
+label WHILE_EXP0
+push local 0
+push argument 2
+gt
+not
+not
+if-goto WHILE_END0
+push argument 2
+push argument 2
+call Math.multiply 2
+push local 0
+push local 0
+call Math.multiply 2
+sub
+call Math.sqrt 1
+pop local 1
+push argument 0
+push local 1
+sub
+push argument 1
+push local 0
+add
+push argument 0
+push local 1
+add
+push argument 1
+push local 0
+add
+call Screen.drawLine 4
+pop temp 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 return
