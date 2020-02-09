@@ -1,4 +1,4 @@
-function Output.init 1
+function Output.init 0
 push constant 16384
 pop static 1
 push constant 0
@@ -6,25 +6,6 @@ push constant 0
 call Output.setAddress 2
 pop temp 0
 call Output.initMap 0
-pop temp 0
-label WHILE_EXP0
-push local 0
-push constant 64
-lt
-not
-if-goto WHILE_END0
-push constant 97
-call Output.printChar 1
-pop temp 0
-push local 0
-push constant 1
-add
-pop local 0
-goto WHILE_EXP0
-label WHILE_END0
-call Output.backSpace 0
-pop temp 0
-call Sys.halt 0
 pop temp 0
 push constant 0
 return
@@ -509,15 +490,15 @@ push constant 0
 call Output.create 12
 pop temp 0
 push constant 65
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
-push constant 0
+push constant 31
+push constant 51
+push constant 51
+push constant 51
+push constant 31
+push constant 51
+push constant 51
+push constant 51
+push constant 31
 push constant 0
 push constant 0
 call Output.create 12
@@ -1522,6 +1503,9 @@ pop static 4
 push constant 0
 return
 function Output.moveCursor 0
+push constant 0
+call Output.drawCursor 1
+pop temp 0
 push argument 0
 push argument 1
 call Output.setAddress 2
@@ -1754,8 +1738,6 @@ label IF_END0
 push constant 0
 not
 call Output.drawCursor 1
-pop temp 0
-call Output.advanceCursor 0
 pop temp 0
 push constant 0
 return
