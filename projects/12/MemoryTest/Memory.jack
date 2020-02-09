@@ -18,11 +18,22 @@ class Memory {
     // accessed with memory[x];
     static Array memory;
 
+    static int HEAP_BASE;
+
+    // pointer to next available address
+    static int free;
+
     /** Initializes the class. */
     function void init() {
-        let memory = 0;
+        var Array arr;
 
-        do Memory.poke(8000, -1);
+        let memory = 0;
+        let HEAP_BASE = 2048;
+        let free = HEAP_BASE;
+
+        let arr = Array.new(2);
+        let arr[0] = 1;
+        let arr[1] = 2;
 
         do Sys.halt();
 
@@ -43,7 +54,12 @@ class Memory {
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
-        return 1;
+        var int pointer;
+
+        let pointer = free;
+        let free = free + size;
+
+        return pointer;
     }
 
     /** De-allocates the given object (cast as an array) by making
