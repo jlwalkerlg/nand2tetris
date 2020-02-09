@@ -23,16 +23,19 @@ class Output {
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        var int i;
+
         let SCREEN = 16384;
         do Output.setAddress(0, 0);
 
         do Output.initMap();
 
-        while (row < 23) {
-            do Output.printString("hello, clarice");
-            do Output.printInt(-16384);
+        while (i < 64) {
+            do Output.printChar(97);
+            let i = i + 1;
         }
-        do Output.println();
+
+        do Output.backSpace();
 
         do Sys.halt();
 
@@ -322,6 +325,18 @@ class Output {
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        do Output.drawCursor(false);
+
+        if (col = 0) {
+            if (row > 0) {
+                do Output.setAddress(row - 1, 63);
+            }
+        } else {
+            do Output.setAddress(row, col - 1);
+        }
+
+        do Output.drawCursor(true);
+
         return;
     }
 }
