@@ -29,6 +29,7 @@ class Output {
         do Output.initMap();
 
         do Output.printString("hello");
+        do Output.printInt(-16384);
 
         do Sys.halt();
 
@@ -288,6 +289,13 @@ class Output {
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        var String s;
+
+        let s = String.new(6);
+        do s.setInt(i);
+
+        do Output.printString(s);
+
         return;
     }
 
