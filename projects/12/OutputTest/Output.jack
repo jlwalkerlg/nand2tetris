@@ -28,8 +28,11 @@ class Output {
 
         do Output.initMap();
 
-        do Output.printString("hello");
-        do Output.printInt(-16384);
+        while (row < 23) {
+            do Output.printString("hello, clarice");
+            do Output.printInt(-16384);
+        }
+        do Output.println();
 
         do Sys.halt();
 
@@ -296,11 +299,24 @@ class Output {
 
         do Output.printString(s);
 
+        do s.dispose();
+
         return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        do Output.drawCursor(false);
+
+        if (row < 22) {
+            do Output.setAddress(row + 1, 0);
+        } else {
+            do Output.setAddress(0, 0);
+        }
+
+        do Output.drawCursor(true);
+        do Output.advanceCursor();
+
         return;
     }
 
