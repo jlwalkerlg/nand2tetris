@@ -23,17 +23,12 @@ class Output {
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
-        var int i;
-
         let SCREEN = 16384;
         do Output.setAddress(0, 0);
 
         do Output.initMap();
 
-        while (i < 70) {
-            do Output.printChar(48 + i);
-            let i = i + 1;
-        }
+        do Output.printString("hello");
 
         do Sys.halt();
 
@@ -278,6 +273,15 @@ class Output {
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int i, len;
+
+        let len = s.length();
+
+        while (i < len) {
+            do Output.printChar(s.charAt(i));
+            let i = i + 1;
+        }
+
         return;
     }
 
