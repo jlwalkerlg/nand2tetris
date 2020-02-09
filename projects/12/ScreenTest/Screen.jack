@@ -59,7 +59,10 @@ class Screen {
         do Screen.drawLine(200, 0, 200, 255);
 
         // diagonal lines
-        do Screen.drawLine(0, 0, 10, 10);
+        do Screen.drawLine(300, 100, 310, 110);
+        do Screen.drawLine(300, 100, 310, 90);
+        do Screen.drawLine(300, 100, 290, 90);
+        do Screen.drawLine(300, 100, 290, 110);
 
         do Screen.drawRectangle(50, 100, 100, 200);
 
@@ -94,16 +97,26 @@ class Screen {
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
-        var int address, mod, pixel, current;
+        var int address, pixel;
 
-        let address = SCREEN + (32 * y) + (x / 16);
-        let mod = x - (x / 16 * 16);
+        let address = Screen.getAddress(x, y);
+        let pixel = Screen.getPixel(x);
 
-        let pixel = twoToThe[mod] & COLOR;
+        do Screen.merge(pixel, address);
+
+        return;
+    }
+
+    function void merge(int word, int address) {
+        var int current;
 
         let current = Memory.peek(address);
 
-        do Memory.poke(address, pixel | current);
+        if (COLOR) {
+            do Memory.poke(address, word | current);
+        } else {
+            do Memory.poke(address, (~word) & current);
+        }
 
         return;
     }
@@ -115,12 +128,12 @@ class Screen {
     function int getPixel(int x) {
         var int mod;
         let mod = x - (x / 16 * 16);
-        return twoToThe[mod] & COLOR;
+        return twoToThe[mod];
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
-        var int dx, dy, a, b, adyMinusbdx;
+        var int dx, dy, a, b, adyMinusbdx, xSign, ySign;
         var int x1Address, x2Address, y1Address, y2Address, mod, pixel;
 
         if (x1 = x2) {
@@ -129,12 +142,12 @@ class Screen {
 
             let pixel = Screen.getPixel(x1);
 
-            do Memory.poke(y1Address, pixel);
+            do Screen.merge(pixel, y1Address);
 
             let y1Address = y1Address + 32;
 
             while (y1Address < y2Address) {
-                do Memory.poke(y1Address, pixel);
+                do Screen.merge(pixel, y1Address);
 
                 let y1Address = y1Address + 32;
             }
@@ -143,9 +156,6 @@ class Screen {
         }
 
         if (y1 = y2) {
-            // draw from x1 to end
-            // draw from 0 to x2
-            // while x1Address < x2Address, poke -1
             let x1Address = Screen.getAddress(x1, y1);
             let x2Address = Screen.getAddress(x2, y1);
 
@@ -155,7 +165,7 @@ class Screen {
             let pixel = twoToThe[x1] - 1;
             let pixel = -1 - pixel;
 
-            do Memory.poke(x1Address, pixel & COLOR);
+            do Screen.merge(pixel, x1Address);
 
             if (x1Address = x2Address) {
                 return;
@@ -170,30 +180,39 @@ class Screen {
                 let pixel = twoToThe[x2 + 1] - 1;
             }
 
-            do Memory.poke(x2Address, pixel & COLOR);
+            do Screen.merge(pixel, x2Address);
 
             // 3. Fill in words between x1Address and x2Address
             let x1Address = x1Address + 1;
 
             while (x1Address < x2Address) {
-                do Memory.poke(x1Address, -1 & COLOR);
+                do Screen.merge(pixel, x1Address);
                 let x1Address = x1Address + 1;
             }
 
             return;
         }
 
-        let dx = x2 - x1;
-        let dy = y2 - y1;
+        let dx = Math.abs(x2 - x1);
+        let dy = Math.abs(y2 - y1);
 
-        while (~(a > dx) & ~(b > dy)) {
+        let xSign = 1;
+        let ySign = 1;
+        if (x2 < x1) {
+            let xSign = -1;
+        }
+        if (y2 < y1) {
+            let ySign = -1;
+        }
+
+        while (~(Math.abs(a) > dx) & ~(Math.abs(b) > dy)) {
             do Screen.drawPixel(x1 + a, y1 + b);
 
             if (adyMinusbdx < 0) {
-                let a = a + 1;
+                let a = a + xSign;
                 let adyMinusbdx = adyMinusbdx + dy;
             } else {
-                let b = b + 1;
+                let b = b + ySign;
                 let adyMinusbdx = adyMinusbdx - dx;
             }
         }
